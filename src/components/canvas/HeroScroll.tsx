@@ -1,218 +1,313 @@
 'use client';
-import { useRef, useEffect } from 'react';
-import { useScroll, useTransform, motion, MotionValue } from 'framer-motion';
-import { useImagePreloader } from '@/hooks/useImagePreloader';
-import CinematicOrb from '@/components/ui/CinematicOrb';
 
-function ScrollWritingText({
-  text,
-  positionClasses,
-  widthTransform,
-  opacityTransform,
-  extraClasses = ""
-}: {
-  text: string;
-  positionClasses: string;
-  widthTransform: MotionValue<string>;
-  opacityTransform: MotionValue<number>;
-  extraClasses?: string;
-}) {
-  return (
-    <motion.div
-      style={{ opacity: opacityTransform }}
-      className={`absolute z-30 pointer-events-none flex ${positionClasses}`}
-    >
-      <motion.div
-        style={{ width: widthTransform }}
-        className="overflow-hidden whitespace-nowrap"
-      >
-        <span className={`font-[family-name:var(--font-great-vibes)] text-primary drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] pr-4 ${extraClasses}`}>
-          {text}
-        </span>
-      </motion.div>
-    </motion.div>
-  );
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
+
+// Register GSAP Plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
 export default function HeroScroll() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Load all 226 frames sequentially
-  const { images, loaded } = useImagePreloader('/images', 226, {
+  const frameObj = useRef({ index: 0 });
+  
+  // Load all 252 frames sequentially
+  const { images } = useImagePreloader('/img_new', 252, {
     prefix: 'ezgif-frame-',
     extension: 'jpg',
     padLength: 3,
     offset: 0
   });
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
-
-  // Map the scroll to all 226 frames (index 0 to 225)
-  const frameIndex = useTransform(scrollYProgress, [0, 1], [0, 225]);
-  
-  // Fade out blackout overlays completely by the 20th frame
-  const overlayOpacity = useTransform(frameIndex, [0, 20], [1, 0]);
-
-  // Fade out hero content by the 30th frame
-  const contentOpacity = useTransform(frameIndex, [0, 30], [1, 0]);
-
-  // Scene 2: "Designed for the senses."
-  const scene2Width = useTransform(frameIndex, [50, 75], ["0%", "100%"]);
-  const scene2Opacity = useTransform(frameIndex, [80, 90], [1, 0]);
-
-  // Scene 3: "Where light flows..."
-  const scene3Width = useTransform(frameIndex, [110, 140], ["0%", "100%"]);
-  const scene3Opacity = useTransform(frameIndex, [150, 160], [1, 0]);
-
-  // Scene 4: "Your Sanctuary."
-  const scene4Width = useTransform(frameIndex, [190, 215], ["0%", "100%"]);
-  const scene4Opacity = useTransform(frameIndex, [225, 226], [1, 1]);
-
-  useEffect(() => {
+  const renderFrame = (index: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     
-    const renderFrame = (index: number) => {
-      if (images[index] && images[index].complete && ctx && canvas) {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = window.innerWidth * dpr;
-        canvas.height = window.innerHeight * dpr;
-        ctx.scale(dpr, dpr);
-        
-        const img = images[index];
-        const hRatio = window.innerWidth / img.width;
-        const vRatio = window.innerHeight / img.height;
-        const ratio = Math.max(hRatio, vRatio);
-        const centerShift_x = (window.innerWidth - img.width * ratio) / 2;
-        const centerShift_y = (window.innerHeight - img.height * ratio) / 2;  
-        
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        ctx.drawImage(img, 0,0, img.width, img.height,
-                           centerShift_x,centerShift_y,img.width*ratio, img.height*ratio);
-      }
-    };
+    // Ensure index is within bounds
+    const safeIndex = Math.min(Math.max(Math.round(index), 0), images.length - 1);
+    const img = images[safeIndex];
+    
+    if (img && img.complete) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      
+      // We scale the context by dpr to ensure crisp rendering on high-DPI screens
+      ctx.scale(dpr, dpr);
+      
+      const hRatio = window.innerWidth / img.width;
+      const vRatio = window.innerHeight / img.height;
+      const ratio = Math.max(hRatio, vRatio);
+      
+      const centerShift_x = (window.innerWidth - img.width * ratio) / 2;
+      const centerShift_y = (window.innerHeight - img.height * ratio) / 2;  
+      
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.drawImage(
+        img,
+        0, 0, img.width, img.height,
+        centerShift_x, centerShift_y, img.width * ratio, img.height * ratio
+      );
+    }
+  };
 
-    // Try rendering first frame immediately if ready
-    if (images[0]) {
+  useGSAP(() => {
+    if (!images || images.length === 0) return;
+
+    // Create the main scrubbing timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top top',
+        end: '+=1200%', // Extended Pin for sequential logo -> nav stagger
+        scrub: 0.5,
+        pin: true,
+        anticipatePin: 1,
+      }
+    });
+
+    // Animate the frame index from 0 to 251 (252 total frames)
+    // The duration of 252 allows mapping 'time' in the timeline 1:1 with frame numbers
+    tl.to(frameObj.current, {
+      index: 251,
+      snap: 'index',
+      ease: 'none',
+      duration: 252,
+      onUpdate: () => renderFrame(frameObj.current.index),
+    }, 0);
+
+    // ==========================================
+    // STORYTELLING LAYERS (Phase 1 to Phase 4)
+    // ==========================================
+    
+    // Phase 1 (Frames 1 - 40)
+    tl.fromTo('.phase-1', 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 10, ease: 'power2.out' }, 
+      5 // Starts at frame 5
+    );
+    tl.to('.phase-1', 
+      { opacity: 0, duration: 5, ease: 'power2.in' }, 
+      30 // Fades out by 35 (starts at 30, takes 5 frames)
+    );
+
+    // Phase 2 (Frames 45 - 100)
+    tl.fromTo('.phase-2', 
+      { opacity: 0, x: -50 }, 
+      { opacity: 1, x: 0, duration: 15, ease: 'power2.out' }, 
+      50 // Starts at frame 50
+    );
+    tl.to('.phase-2', 
+      { opacity: 0, duration: 5, ease: 'power2.in' }, 
+      90 // Fades out by 95 (starts at 90, takes 5 frames)
+    );
+
+    // Phase 3 (Frames 105 - 160)
+    tl.fromTo('.phase-3', 
+      { opacity: 0, x: 50 }, 
+      { opacity: 1, x: 0, duration: 15, ease: 'power2.out' }, 
+      110 // Starts at frame 110
+    );
+    tl.to('.phase-3', 
+      { opacity: 0, duration: 5, ease: 'power2.in' }, 
+      150 // Fades out by 155 (starts at 150, takes 5 frames)
+    );
+
+    // Phase 4 (Frames 165 - 240)
+    tl.fromTo('.phase-4', 
+      { opacity: 0, y: 50 }, 
+      { opacity: 1, y: 0, duration: 20, ease: 'power2.out' }, 
+      170 // Starts at frame 170
+    );
+    tl.to('.phase-4', 
+      { opacity: 0, duration: 10, ease: 'power2.in' }, 
+      225 // Fades out by 235 (starts at 225, takes 10 frames)
+    );
+
+    // ==========================================
+    // FINAL LOGO REVEAL (Post-Frames)
+    // ==========================================
+    
+    // 1. Slide up the blank white panel
+    tl.to('.final-logo-panel',
+      { yPercent: -100, duration: 80, ease: 'power2.inOut' },
+      252 // Starts precisely when the final frame finishes
+    );
+
+    // 2. The Logo Reveal
+    tl.from('.final-logo',
+      { opacity: 0, y: 50, duration: 40, ease: 'power2.out' },
+      332 // Starts AFTER the white panel has fully settled
+    );
+
+    // 3. The Staggered Navbar Reveal
+    tl.from('.nav-item',
+      { opacity: 0, y: 30, stagger: 20, duration: 30, ease: 'power2.out' },
+      372 // Starts strictly AFTER the logo finishes its reveal
+    );
+
+  }, { dependencies: [images], scope: containerRef });
+
+  // Render the initial frame when the first image loads
+  useEffect(() => {
+    if (images.length > 0) {
       if (images[0].complete) {
         renderFrame(0);
       } else {
         images[0].addEventListener('load', () => renderFrame(0));
       }
     }
+  }, [images]);
 
-    // Subscribe to framer motion value
-    const unsubscribe = frameIndex.on("change", (latest) => {
-      renderFrame(Math.round(latest));
-    });
-
-    return () => unsubscribe();
-  }, [frameIndex, images]);
+  // Design Variables
+  const headingStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-playfair), "Playfair Display", serif',
+    fontWeight: 600,
+    marginBottom: '0.5rem',
+  };
+  
+  const bodyStyle: React.CSSProperties = {
+    fontFamily: '"Lato", sans-serif',
+    fontWeight: 400,
+    fontSize: '1.125rem',
+  };
 
   return (
-    <div ref={containerRef} className="h-[800vh] relative bg-background">
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/* Canvas background */}
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-0" />
+    <div ref={containerRef} className="h-screen w-full relative bg-[#111] overflow-hidden">
+      {/* Canvas Layer */}
+      <canvas 
+        ref={canvasRef} 
+        className="absolute inset-0 w-full h-full object-cover z-0" 
+      />
+
+      {/* 
+        Storytelling Overlays
+        Opacity is set to 0 by default to prevent layout flashing before GSAP takes over.
+      */}
+      
+      {/* Phase 1: Top-Center (Shifted up to avoid house) */}
+      <div 
+        className="phase-1 absolute top-[15%] left-0 right-0 flex flex-col items-center text-center z-10 p-6 pointer-events-none"
+        style={{ opacity: 0 }}
+      >
+        {/* Bright glow underlay for absolute contrast against dark fonts */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0)_60%)] -z-10 scale-[1.5]" />
+
+        <h1 className="text-4xl md:text-6xl lg:text-7xl bg-gradient-to-r from-[#7D7F82] via-[#2A2826] to-[#050505] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(255,255,255,0.7)]" style={headingStyle}>
+          Raw Vision.
+        </h1>
+        <p style={bodyStyle} className="max-w-md text-[#2A2826] drop-shadow-[0_2px_5px_rgba(255,255,255,0.9)] mt-2 font-medium">
+          Form preceding function in its purest state.
+        </p>
+      </div>
+
+      {/* Phase 2: Left-aligned (Shifted up) */}
+      <div 
+        className="phase-2 absolute left-[10%] top-[18%] flex flex-col items-start text-left z-10 p-6 pointer-events-none"
+        style={{ opacity: 0 }}
+      >
+        {/* Bright glow underlay for absolute contrast against dark fonts */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0)_60%)] -z-10 scale-[1.5]" />
+
+        <h1 className="text-4xl md:text-5xl lg:text-6xl max-w-xl bg-gradient-to-r from-[#7D7F82] via-[#2A2826] to-[#050505] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(255,255,255,0.7)]" style={headingStyle}>
+          Absolute Precision.
+        </h1>
+        <p style={bodyStyle} className="max-w-md text-[#2A2826] drop-shadow-[0_2px_5px_rgba(255,255,255,0.9)] mt-2 font-medium">
+          Every millimeter calculated. Every angle deliberate.
+        </p>
+      </div>
+
+      {/* Phase 3: Right-aligned (Shifted up) */}
+      <div 
+        className="phase-3 absolute right-[10%] top-[18%] flex flex-col items-end text-right z-10 p-6 pointer-events-none"
+        style={{ opacity: 0 }}
+      >
+        {/* Black glow underlay for absolute contrast */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0)_60%)] -z-10 scale-[1.5]" />
         
-        {/* Cinematic Dark Overlays (Fade out by frame 20) */}
-        <motion.div style={{ opacity: overlayOpacity }} className="absolute inset-0 z-10 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
-          <div className="absolute inset-0 bg-black/20 mix-blend-overlay" />
-          
-          {/* Micro Atmospheric Effects */}
-          <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] mix-blend-screen" />
-        </motion.div>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl max-w-xl bg-gradient-to-r from-[#FDE8AE] via-[#C4A47C] to-[#8A6A40] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" style={headingStyle}>
+          Living Reality.
+        </h1>
+        <p style={bodyStyle} className="max-w-md text-[#E8D4B4] drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)] mt-2">
+          Bridging the gap between the drafted line and the built environment.
+        </p>
+      </div>
 
-        {/* Hero Content Composition */}
-        <motion.div style={{ opacity: contentOpacity }} className="absolute inset-0 z-20 flex flex-col justify-end pb-32 px-6 md:px-16 lg:px-32 max-w-[1600px] mx-auto w-full">
-          
-          {/* Main Typography */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.2 }}
-            className="mb-6"
-          >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-playfair leading-[1.15] text-white tracking-tight">
-              Architecture <br />
-              <span className="font-light">is an</span> <span className="text-primary italic">Experience.</span>
-            </h1>
-          </motion.div>
+      {/* Phase 4: Bottom-Center (Shifted up slightly or kept with shadow) */}
+      <div 
+        className="phase-4 absolute bottom-[25%] left-1/2 -translate-x-1/2 flex flex-col items-center text-center z-10 p-6 pointer-events-none"
+        style={{ opacity: 0 }}
+      >
+        {/* Black glow underlay for absolute contrast */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0)_60%)] -z-10 scale-[1.5]" />
 
-          {/* Supporting Text */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.6 }}
-            className="text-white/70 font-inter text-sm md:text-base max-w-md leading-relaxed tracking-wide mb-12"
-          >
-            We craft environments that elevate everyday moments into timeless experiences.
-          </motion.p>
+        <h1 className="text-5xl md:text-6xl lg:text-8xl w-max bg-gradient-to-r from-[#FDE8AE] via-[#C4A47C] to-[#8A6A40] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" style={headingStyle}>
+          Curated Spaces.
+        </h1>
+        <p style={bodyStyle} className="max-w-xl text-lg md:text-xl text-[#E8D4B4] drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)] mt-2">
+          Interiors designed for the human experience.
+        </p>
+      </div>
 
-          {/* Call to Action */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
-            className="group flex items-center gap-4 w-fit"
-          >
-            <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/10 transition-all duration-500">
-              <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-white border-b-[5px] border-b-transparent ml-1 group-hover:border-l-primary transition-colors duration-500" />
+      {/* 
+        Final Logo Reveal Panel
+        This slides up from the bottom exactly after the image scrubbing finishes.
+      */}
+      <div 
+        className="final-logo-panel absolute top-full left-0 w-full h-full z-40 bg-white flex flex-col items-center justify-center pointer-events-auto"
+      >
+        <div 
+          className="final-logo w-full max-w-[450px] h-48 md:h-64 bg-no-repeat bg-center bg-contain mb-[80px]"
+          style={{ 
+            backgroundImage: `url('https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780135525/ChatGPT_Image_May_30_2026_03_34_07_PM_vddnww.png')`
+          }}
+        />
+        
+        {/* Navbar Items that appear below the logo */}
+        <div 
+          className="flex items-center flex-wrap justify-center gap-8 md:gap-16 text-[#2A2826] uppercase"
+          style={{
+            fontFamily: '"Lato", sans-serif',
+            fontWeight: 400,
+            fontSize: '14px',
+            letterSpacing: '0.15em'
+          }}
+        >
+          {['Philosophy', 'Projects', 'Process', 'Contact'].map((item) => (
+            <div 
+              key={item} 
+              className="nav-item group relative cursor-pointer" 
+              style={{ perspective: '800px', height: '1.2em' }}
+            >
+              <div 
+                className="relative w-full h-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:rotateX(90deg)]" 
+                style={{ transformStyle: 'preserve-3d', transformOrigin: '50% 50% -0.6em' }}
+              >
+                {/* Front Face */}
+                <div 
+                  className="relative text-[#2A2826] h-full flex items-center" 
+                  style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+                >
+                  {item}
+                </div>
+                {/* Bottom Face (Rotated underneath, becomes front on hover) */}
+                <div 
+                  className="absolute inset-0 text-[#C4A47C] flex items-center" 
+                  style={{ transform: 'rotateX(-90deg) translateY(100%)', transformOrigin: 'top center', backfaceVisibility: 'hidden' }}
+                >
+                  {item}
+                </div>
+              </div>
             </div>
-            <span className="text-white text-xs font-inter uppercase tracking-[0.2em] group-hover:text-primary transition-colors duration-500">
-              Explore Our World
-            </span>
-          </motion.button>
-        </motion.div>
-
-        {/* Scroll Indicator */}
-        <motion.div style={{ opacity: contentOpacity }} className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4">
-          <div className="w-[1px] h-12 bg-gradient-to-b from-primary to-transparent opacity-50" />
-          <div className="w-6 h-10 border border-white/20 rounded-full flex justify-center p-1">
-            <motion.div 
-              animate={{ y: [0, 16, 0], opacity: [1, 0, 1] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              className="w-1 h-1 bg-primary rounded-full mt-1"
-            />
-          </div>
-          <span className="text-white/40 text-[10px] uppercase tracking-[0.3em] mt-2">Scroll To Experience</span>
-        </motion.div>
-
-        {/* Scene 2: The Approach */}
-        <ScrollWritingText
-          text="Designed for the senses."
-          positionClasses="top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center"
-          extraClasses="text-5xl md:text-7xl lg:text-8xl"
-          widthTransform={scene2Width}
-          opacityTransform={scene2Opacity}
-        />
-
-        {/* Scene 3: The Interior */}
-        <ScrollWritingText
-          text="Where light flows..."
-          positionClasses="bottom-32 left-8 md:left-24 lg:left-32 justify-start"
-          extraClasses="text-5xl md:text-7xl lg:text-[6rem]"
-          widthTransform={scene3Width}
-          opacityTransform={scene3Opacity}
-        />
-
-        {/* Scene 4: The Reveal */}
-        <ScrollWritingText
-          text="Your Sanctuary."
-          positionClasses="bottom-48 left-1/2 -translate-x-1/2 justify-center"
-          extraClasses="text-6xl md:text-8xl lg:text-[8rem]"
-          widthTransform={scene4Width}
-          opacityTransform={scene4Opacity}
-        />
-
-        <CinematicOrb />
+          ))}
+        </div>
       </div>
     </div>
   );

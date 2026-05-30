@@ -1,7 +1,6 @@
 'use client';
 import { useEffect } from 'react';
 import Lenis from 'lenis';
-import Header from '@/components/ui/Header';
 import HeroScroll from '@/components/canvas/HeroScroll';
 import ConsultationForm from '@/components/ui/ConsultationForm';
 import TypewriterText from '@/components/ui/TypewriterText';
@@ -29,8 +28,6 @@ export default function Home() {
 
   return (
     <main className="bg-background min-h-screen text-foreground font-inter">
-      <Header />
-      
       {/* Single seamless canvas experience for all frames */}
       <HeroScroll />
       
