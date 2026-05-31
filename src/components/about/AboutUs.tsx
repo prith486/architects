@@ -51,8 +51,13 @@ export default function AboutUs() {
 
   return (
     <section id="about-us" className="about-section" ref={containerRef}>
-      <div className="about-header-container">
-        <h2 className="about-main-title text-[#111111]">Spaces that elevate. <br />Experiences that endure.</h2>
+      <div className="about-header-container flex flex-col items-center">
+        <h2 className="about-main-title text-[#111111] text-center">
+          Calculated <span className="gold-text-premium">Vision.</span> <br />Tactile <span className="gold-text-premium">Reality.</span>
+        </h2>
+        <p className="about-subtitle text-center max-w-[800px] mt-2 mb-16 text-[16px] md:text-[20px] leading-[1.8] text-[#5c5c5c] font-light font-lato">
+          True architecture begins long before the foundation is laid. It starts with a profound dialogue between human intuition, rigorous engineering, and the physical environment.
+        </p>
       </div>
 
       <div className="about-grid-container">

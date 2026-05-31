@@ -83,7 +83,7 @@ export default function ProcessTimeline() {
         
         <div className="timeline-progress-line" ref={lineRef} id="timeline-line"></div>
 
-        <article className="timeline-item left">
+        <article className="timeline-item left timeline-has-image">
           <div className="timeline-node"></div>
           <div className="timeline-content glass-panel-alt">
             <span className="timeline-phase">01. Discovery</span>
@@ -92,10 +92,16 @@ export default function ProcessTimeline() {
               Before a single line is drawn, we analyze the topography, climate, and zoning. We listen to your vision to establish a robust architectural brief that harmonizes with the environment.
             </p>
           </div>
+          <div className="timeline-image">
+            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250744/1_uksekv.png" alt="Site & Feasibility Image" />
+          </div>
         </article>
 
-        <article className="timeline-item right">
+        <article className="timeline-item right timeline-has-image">
           <div className="timeline-node"></div>
+          <div className="timeline-image">
+            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250742/2_ad2lxb.png" alt="Architectural Drafting Image" />
+          </div>
           <div className="timeline-content glass-panel-alt">
             <span className="timeline-phase">02. Conception</span>
             <h3 className="timeline-title">Architectural Drafting</h3>
@@ -105,7 +111,7 @@ export default function ProcessTimeline() {
           </div>
         </article>
 
-        <article className="timeline-item left">
+        <article className="timeline-item left timeline-has-image">
           <div className="timeline-node"></div>
           <div className="timeline-content glass-panel-alt">
             <span className="timeline-phase">03. Engineering</span>
@@ -114,10 +120,16 @@ export default function ProcessTimeline() {
               The concept becomes tangible. Through hyper-realistic 3D rendering and rigorous structural engineering, we bridge the gap between imagination and physical reality.
             </p>
           </div>
+          <div className="timeline-image">
+            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250743/4_wejqgt.png" alt="Precision Rendering Image" />
+          </div>
         </article>
 
-        <article className="timeline-item right">
+        <article className="timeline-item right timeline-has-image">
           <div className="timeline-node"></div>
+          <div className="timeline-image">
+            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250743/3_c4nihg.png" alt="Construction & Handover Image" />
+          </div>
           <div className="timeline-content glass-panel-alt">
             <span className="timeline-phase">04. Execution</span>
             <h3 className="timeline-title">Construction & Handover</h3>

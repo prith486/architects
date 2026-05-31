@@ -87,15 +87,10 @@ export default function HeroScroll() {
     // STORYTELLING LAYERS (Phase 1 to Phase 4)
     // ==========================================
     
-    // Phase 1 (Frames 1 - 40)
-    tl.fromTo('.phase-1', 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 10, ease: 'power2.out' }, 
-      5 // Starts at frame 5
-    );
-    tl.to('.phase-1', 
-      { opacity: 0, duration: 5, ease: 'power2.in' }, 
-      30 // Fades out by 35 (starts at 30, takes 5 frames)
+    // VAASTU Initial Hero UI (Fades out when scrolling begins)
+    tl.to(['.fade-layer', '.hero-overlay'], 
+      { opacity: 0, y: -20, duration: 25, ease: 'power2.inOut' }, 
+      0 // Starts fading out immediately on scroll
     );
 
     // Phase 2 (Frames 45 - 100)
@@ -205,25 +200,63 @@ export default function HeroScroll() {
         className="absolute inset-0 w-full h-full object-cover z-0" 
       />
 
-      {/* 
-        Storytelling Overlays
-        Opacity is set to 0 by default to prevent layout flashing before GSAP takes over.
-      */}
-      
-      {/* Phase 1: Top-Center (Shifted up to avoid house) */}
-      <div 
-        className="phase-1 absolute top-[15%] left-0 right-0 flex flex-col items-center text-center z-10 p-6 pointer-events-none"
-        style={{ opacity: 0 }}
-      >
-        {/* Bright glow underlay for absolute contrast against dark fonts */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0)_60%)] -z-10 scale-[1.5]" />
+      {/* Watermark Cover - Placed exactly over Dola AI */}
+      <div className="absolute bottom-[2%] right-[1%] z-[5] pointer-events-none select-none">
+        <img 
+          src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780135525/ChatGPT_Image_May_30_2026_03_34_07_PM_vddnww.png" 
+          alt="Vaastu Signature" 
+          className="w-32 md:w-44 h-auto object-contain rounded-2xl opacity-100"
+        />
+      </div>
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl bg-gradient-to-r from-[#7D7F82] via-[#2A2826] to-[#050505] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(255,255,255,0.7)]" style={headingStyle}>
-          Raw Vision.
+      {/* 
+        VAASTU HERO UI (Visible at start, fades out on scroll)
+      */}
+      <div className="hero-overlay pointer-events-none"></div>
+
+      <div className="hero-top-bar fade-layer pointer-events-none" data-speed="1.5">
+        <div className="meta-left">
+          <span className="meta-text">EST.</span>
+          <span className="meta-text">2020</span>
+          <div className="meta-line"></div>
+        </div>
+        <div className="brand-center">
+          <div className="brand-logo">V<span className="gold-a">AA</span>STU</div>
+          <div className="brand-tagline">ARCHITECTURE . INTERIORS . HARMONY</div>
+        </div>
+        <div className="meta-right">
+          <span className="meta-text">PUNE</span>
+          <span className="meta-text">INDIA</span>
+        </div>
+      </div>
+
+      <div className="hero-main-content fade-layer pointer-events-none" data-speed="1">
+        <h1 className="hero-title">
+          Spaces that elevate.<br />
+          Experiences that endure.
         </h1>
-        <p style={bodyStyle} className="max-w-md text-[#2A2826] drop-shadow-[0_2px_5px_rgba(255,255,255,0.9)] mt-2 font-medium">
-          Form preceding function in its purest state.
+        <p className="hero-subtitle">
+          We design with intention, craft with precision<br />
+          and build places that inspire for generations.
         </p>
+        <div className="hero-explore pointer-events-auto">
+          <span className="explore-text">EXPLORE OUR PHILOSOPHY</span>
+          <div className="explore-line"></div>
+        </div>
+        <div className="hero-slider-indicator">
+          <span className="slider-num">01</span>
+          <div className="slider-track"><div className="slider-fill"></div></div>
+          <span className="slider-num">04</span>
+        </div>
+      </div>
+
+      <div className="hero-scroll-indicator fade-layer pointer-events-none" data-speed="1.2">
+        <div className="scroll-arrow-container">
+          <div className="scroll-line-vertical"></div>
+          <svg className="arrow-down" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M19 12l-7 7-7-7"/>
+          </svg>
+        </div>
       </div>
 
       {/* Phase 2: Left-aligned (Shifted up) */}
@@ -296,21 +329,33 @@ export default function HeroScroll() {
         />
 
         {/* Vertical Guide Lines */}
-        <div className="vertical-guide absolute left-6 md:left-20 top-[140px] bottom-[80px] w-[1px] bg-[rgba(196,164,124,0.38)] pointer-events-none" />
-        <div className="vertical-guide absolute right-6 md:right-20 top-[140px] bottom-[80px] w-[1px] bg-[rgba(196,164,124,0.38)] pointer-events-none" />
+        <div 
+          className="vertical-guide absolute left-6 md:left-20 top-[140px] bottom-[80px] w-[2px] pointer-events-none" 
+          style={{
+            background: 'linear-gradient(to bottom, rgba(181, 148, 107, 0) 0%, rgba(181, 148, 107, 0.7) 15%, #9c7b50 50%, rgba(181, 148, 107, 0.7) 85%, rgba(181, 148, 107, 0) 100%)',
+            boxShadow: '0 0 4px rgba(181, 148, 107, 0.6)'
+          }}
+        />
+        <div 
+          className="vertical-guide absolute right-6 md:right-20 top-[140px] bottom-[80px] w-[2px] pointer-events-none" 
+          style={{
+            background: 'linear-gradient(to bottom, rgba(181, 148, 107, 0) 0%, rgba(181, 148, 107, 0.7) 15%, #9c7b50 50%, rgba(181, 148, 107, 0.7) 85%, rgba(181, 148, 107, 0) 100%)',
+            boxShadow: '0 0 4px rgba(181, 148, 107, 0.6)'
+          }}
+        />
 
         {/* Vertical Architectural Metadata - Left Side */}
-        <div className="meta-left absolute top-10 left-6 md:left-20 -translate-x-1/2 flex flex-col items-center text-center font-lato text-[11px] md:text-[12px] font-light tracking-[0.25em] text-[#C4A47C] opacity-80 leading-relaxed pointer-events-none">
+        <div className="meta-left absolute top-10 left-6 md:left-20 -translate-x-1/2 flex flex-col items-center text-center font-sans text-[10px] md:text-[11px] font-semibold tracking-[0.25em] text-[#8c6200] leading-relaxed pointer-events-none">
           <div>EST.</div>
           <div>2020</div>
-          <div className="w-4 h-[1px] bg-[#C4A47C]/40 mt-4" />
+          <div className="w-4 h-[2px] bg-[#8c6200]/40 mt-4" />
         </div>
 
         {/* Vertical Architectural Metadata - Right Side */}
-        <div className="meta-right absolute top-10 right-6 md:right-20 translate-x-1/2 flex flex-col items-center text-center font-lato text-[11px] md:text-[12px] font-light tracking-[0.25em] text-[#C4A47C] opacity-80 leading-relaxed pointer-events-none">
+        <div className="meta-right absolute top-10 right-6 md:right-20 translate-x-1/2 flex flex-col items-center text-center font-sans text-[10px] md:text-[11px] font-semibold tracking-[0.25em] text-[#8c6200] leading-relaxed pointer-events-none">
           <div>PUNE</div>
           <div>INDIA</div>
-          <div className="w-4 h-[1px] bg-[#C4A47C]/40 mt-4" />
+          <div className="w-4 h-[2px] bg-[#8c6200]/40 mt-4" />
         </div>
 
         {/* Central Content Area (Focal Point) */}
@@ -327,16 +372,16 @@ export default function HeroScroll() {
 
           {/* Navigation Links */}
           <div 
-            className="flex items-center flex-wrap justify-center gap-6 md:gap-[72px] text-[#2A2826] uppercase mt-8 text-[16px] md:text-[18px] tracking-[0.12em] flex-shrink-0"
+            className="flex items-center flex-wrap justify-center gap-6 md:gap-[72px] text-[#111111] uppercase mt-8 text-[15px] md:text-[16px] tracking-[0.15em] flex-shrink-0"
             style={{
-              fontFamily: 'var(--font-lato), sans-serif',
-              fontWeight: 300,
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 600,
             }}
           >
             {['Philosophy', 'Projects', 'Process', 'Contact'].map((item) => (
               <div 
                 key={item} 
-                className="nav-item relative cursor-pointer py-2 group text-[#2A2826]/92 hover:text-[#C4A47C]" 
+                className="nav-item relative cursor-pointer py-2 group text-[#1a1a1a] hover:text-[#8c6200] transition-colors" 
                 onClick={() => {
                   const el = document.getElementById(item.toLowerCase());
                   if (el) {
@@ -362,37 +407,47 @@ export default function HeroScroll() {
 
           {/* Hero Statement */}
           <h1 
-            className="hero-statement text-center font-light leading-[0.95] max-w-[1100px] mt-6 md:mt-[36px] tracking-tight flex-shrink-0 bg-gradient-to-r from-[#1A1817] via-[#4E4742] to-[#1A1817] bg-clip-text text-transparent"
+            className="hero-statement text-center font-light leading-[0.95] max-w-[1100px] mt-6 md:mt-[36px] tracking-tight flex-shrink-0"
             style={{
               fontFamily: 'var(--font-cormorant), serif',
               fontSize: 'clamp(32px, 4.5vw, 68px)',
+              background: 'linear-gradient(135deg, #0a0a0a 0%, #3a3a3a 35%, #1a1a1a 65%, #2a2a2a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              color: 'transparent',
+              filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))'
             }}
           >
-            Spaces that elevate.<br />
-            Experiences that endure.
+            Silent Strength. Enduring Design.
           </h1>
 
           {/* Supporting Copy */}
           <p 
-            className="supporting-copy text-center max-w-[700px] mt-4 md:mt-6 px-4 text-[15px] md:text-[18px] leading-[1.8] flex-shrink-0 bg-gradient-to-r from-[#4A4744] via-[#65615D] to-[#4A4744] bg-clip-text text-transparent"
+            className="supporting-copy text-center max-w-[700px] mt-4 md:mt-6 px-4 text-[15px] md:text-[18px] leading-[1.8] flex-shrink-0"
             style={{
               fontFamily: 'var(--font-lato), sans-serif',
               fontWeight: 300,
+              background: 'linear-gradient(135deg, #333333 0%, #555555 50%, #333333 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              color: 'transparent',
+              letterSpacing: '0.02em',
+              filter: 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.08))'
             }}
           >
-            We design with intention, craft with precision<br className="hidden md:inline" /> and build places that inspire for generations.
+            Forging the intersection of raw materiality and natural harmony. We sculpt light, shadow, and geometry to create uncompromising architectural statements.
           </p>
         </div>
 
 
         {/* Scroll Indicator */}
         <div 
-          className="scroll-indicator absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center text-center text-[#C4A47C] pointer-events-none select-none z-20"
+          className="scroll-indicator absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center text-center text-[#8c6200] pointer-events-none select-none z-20"
           style={{
-            fontFamily: 'var(--font-lato), sans-serif',
+            fontFamily: 'var(--font-sans)',
             fontSize: '11px',
-            fontWeight: 300,
-            letterSpacing: '0.3em',
+            fontWeight: 600,
+            letterSpacing: '0.25em',
           }}
         >
           {/* Vertical Golden Line */}
@@ -407,7 +462,7 @@ export default function HeroScroll() {
           />
           <div>SCROLL TO EXPLORE</div>
           <svg 
-            className="w-5 h-5 mt-2 text-[#C4A47C] animate-float-arrow" 
+            className="w-5 h-5 mt-2 text-[#8c6200] animate-float-arrow" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor" 

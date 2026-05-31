@@ -12,7 +12,10 @@ export default function ContactFooter() {
           
           {/* Left Side: Massive Typography & Info */}
           <div className="contact-info">
-            <h2 className="contact-title">Let's build <br/><span className="gold-text">together.</span></h2>
+            <h2 className="contact-title">
+              <span className="obsidian-text">Let's build</span> <br/>
+              <span className="gold-text">together.</span>
+            </h2>
             
             <div className="contact-details">
               <div className="detail-block">

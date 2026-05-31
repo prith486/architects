@@ -1,43 +1,87 @@
-# Hero Section Part 1: HTML Architecture (`12_hero_html.md`)
+# Hero Section Redesign Part 1: HTML Architecture (`16_hero_html_update.md`)
 
-**AGENT INSTRUCTION:** This is the absolute top of the website (the Hero section). It must be placed at the very beginning of the `<body>`, before the `#about-us` section. Do not include a navigation bar. 
+**AGENT INSTRUCTION:** Completely replace the existing inner HTML of the `#hero-landing` section with this new structure. This precisely matches the target high-end layout (VAASTU branding, top corner meta-text, bottom-left typography, and bottom-right scroll indicator). 
 
-This structure uses layered absolute positioning to place ultra-premium typography and a scroll indicator over the main cinematic photograph. Notice the `fade-layer` classes; these are critical for the scroll-based disappearance effect we will implement next.
+**CRITICAL:** The `fade-layer` and `data-speed` classes have been strictly preserved. Do not remove them, as they are required to keep the existing scroll-disappearance JavaScript working perfectly without touching the JS file.
 
-## HTML Structure
+## HTML Structure Update
 
 ```html
+<!-- =========================================
+     HERO SECTION (VAASTU LAYOUT)
+     CRITICAL PLACEMENT: Top of the page
+========================================= -->
 <section id="hero-landing" class="hero-section">
   
+  <!-- Layer 1: The Cinematic Background Image -->
   <div class="hero-background">
+    <!-- Image path remains the same -->
     <img src="assets/hero-concrete-house.webp" alt="Modern Concrete Architecture by the Water" class="hero-img">
   </div>
 
+  <!-- Layer 2: The Vignette Overlay -->
   <div class="hero-overlay"></div>
 
-  <div class="hero-content-wrapper">
+  <!-- Layer 3: Top Meta Data & Branding -->
+  <div class="hero-top-bar fade-layer" data-speed="1.5">
     
-    <div class="hero-badge fade-layer" data-speed="1.5">
-      <span class="badge-line"></span>
-      <span class="badge-text">EST. 2020</span>
+    <!-- Top Left -->
+    <div class="meta-left">
+      <span class="meta-text">EST.</span>
+      <span class="meta-text">2020</span>
+      <div class="meta-line"></div>
     </div>
 
-    <h1 class="hero-title fade-layer" data-speed="1">
-      <span class="title-word">Form.</span><br>
-      <span class="title-word gold-text">Function.</span><br>
-      <span class="title-word">Forever.</span>
-    </h1>
+    <!-- Top Center (Logo) -->
+    <div class="brand-center">
+      <div class="brand-logo">VA<span class="gold-a">A</span>STU</div>
+      <div class="brand-tagline">ARCHITECTURE . INTERIORS . HARMONY</div>
+    </div>
 
-    <p class="hero-subtitle fade-layer" data-speed="0.8">
-      Redefining the brutalist aesthetic for the modern landscape.
+    <!-- Top Right -->
+    <div class="meta-right">
+      <span class="meta-text">PUNE</span>
+      <span class="meta-text">INDIA</span>
+    </div>
+  </div>
+
+  <!-- Layer 4: Bottom Left Main Typography -->
+  <div class="hero-main-content fade-layer" data-speed="1">
+    
+    <h1 class="hero-title">
+      Spaces that elevate.<br>
+      Experiences that endure.
+    </h1>
+    
+    <p class="hero-subtitle">
+      We design with intention, craft with precision<br>
+      and build places that inspire for generations.
     </p>
+
+    <!-- Explore link -->
+    <div class="hero-explore">
+      <span class="explore-text">EXPLORE OUR PHILOSOPHY</span>
+      <div class="explore-line"></div>
+    </div>
+
+    <!-- Slider Indicator -->
+    <div class="hero-slider-indicator">
+      <span class="slider-num">01</span>
+      <div class="slider-track"><div class="slider-fill"></div></div>
+      <span class="slider-num">04</span>
+    </div>
 
   </div>
 
-  <div class="scroll-indicator fade-layer" data-speed="2">
-    <span class="scroll-text">Scroll to explore</span>
-    <div class="scroll-line-container">
-      <div class="scroll-line"></div>
+  <!-- Layer 5: Bottom Right Scroll Indicator -->
+  <div class="hero-scroll-indicator fade-layer" data-speed="1.2">
+    <span class="scroll-text">SCROLL TO BEGIN</span>
+    <div class="scroll-arrow-container">
+      <div class="scroll-line-vertical"></div>
+      <!-- SVG Down Arrow -->
+      <svg class="arrow-down" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7"/>
+      </svg>
     </div>
   </div>
 

@@ -1,213 +1,239 @@
-# Hero Section Part 2: Styling & Scroll Animation (`13_hero_css_js.md`)
+# Hero Section Redesign Part 2: CSS Overwrite (`17_hero_redesign_css.md`)
 
-**AGENT INSTRUCTION:** Add this CSS to the main stylesheet and this JavaScript to the main script file. This code styles the `#hero-landing` section to achieve a "crazy premium" editorial look and implements a scroll-based staggered fade out so the hero content disappears as the user begins to scroll.
+**AGENT INSTRUCTION:** Overwrite the previous `.hero-section` styles with this updated CSS. This perfectly maps the new HTML structure to the four corners of the screen, utilizing the premium typography system (`var(--font-serif)` and `var(--font-sans)`). 
 
-## 1. CSS Styling
+## CSS Overwrite
 
 ```css
 /* =========================================
-   HERO SECTION STYLES (PREMIUM EDITORIAL)
+   HERO SECTION (VAASTU PREMIUM LAYOUT)
 ========================================= */
 
 .hero-section {
   position: relative;
   width: 100%;
-  height: 100vh; /* Takes up exactly the full screen initially */
-  min-height: 700px;
-  overflow: hidden; /* Prevents scroll overflow from absolute elements */
+  height: 100vh;
+  min-height: 800px;
+  overflow: hidden;
   background-color: #000;
+  color: #fff;
 }
 
-/* --- Layer 1: Background Image --- */
-.hero-background {
+/* --- Layer 1 & 2: Background and Overlay --- */
+.hero-background, .hero-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
 }
 
 .hero-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Slight scale to allow for a subtle zoom effect if desired later */
-  transform: scale(1.02); 
+  transform: scale(1.02); /* Slight zoom for premium feel */
 }
 
-/* --- Layer 2: Vignette Overlay --- */
 .hero-overlay {
+  z-index: 2;
+  /* Deepens the shadows at the bottom and top so white text pops */
+  background: 
+    linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 40%),
+    linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 30%);
+}
+
+/* --- Layer 3: Top Navigation / Branding (Absolute Top) --- */
+.hero-top-bar {
   position: absolute;
-  top: 0;
+  top: 40px;
   left: 0;
   width: 100%;
-  height: 100%;
-  z-index: 2;
-  /* Creates a dark gradient from the bottom and edges to make text pop against the bright sky */
-  background: 
-    linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%),
-    linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 50%);
+  padding: 0 4vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 10;
 }
 
-/* --- Layer 3: Content & Typography --- */
-.hero-content-wrapper {
-  position: relative;
-  z-index: 10;
+/* Meta Data (EST 2020 & PUNE INDIA) */
+.meta-left, .meta-right {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  padding: 0 6vw; /* Aligns with the wide cinematic margins */
+  gap: 6px;
 }
 
-/* The structural layers we will animate with JS */
-.fade-layer {
-  will-change: opacity, transform; /* Hardware acceleration for buttery smooth scrolling */
+.meta-right {
+  text-align: right;
 }
 
-/* 1. The Badge */
-.hero-badge {
+.meta-text {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.meta-line {
+  width: 1px;
+  height: 20px;
+  background-color: var(--color-accent-gold);
+  margin-top: 8px;
+}
+
+/* Central Brand */
+.brand-center {
+  text-align: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+}
+
+.brand-logo {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.gold-a {
+  color: var(--color-accent-gold);
+  font-style: italic; /* Mimics the stylized 'A' in the reference */
+}
+
+.brand-tagline {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* --- Layer 4: Bottom Left Main Content --- */
+.hero-main-content {
+  position: absolute;
+  bottom: 80px;
+  left: 4vw;
+  z-index: 10;
+  max-width: 800px;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   margin-bottom: 24px;
 }
 
-.badge-line {
-  width: 40px;
-  height: 1px;
-  background-color: var(--color-accent-gold);
-}
-
-.badge-text {
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  letter-spacing: 0.2em;
-  color: #fff;
-  text-transform: uppercase;
-}
-
-/* 2. Massive Title */
-.hero-title {
-  font-family: var(--font-serif);
-  font-size: clamp(4rem, 9vw, 8rem);
-  line-height: 0.95;
-  color: #fff;
-  margin: 0 0 32px 0;
-  letter-spacing: -0.02em;
-}
-
-/* 3. Subtitle */
 .hero-subtitle {
   font-family: var(--font-sans);
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  color: rgba(255, 255, 255, 0.75);
-  max-width: 500px;
+  font-size: 1.1rem;
   line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 60px;
   font-weight: 300;
 }
 
-/* --- Layer 4: Scroll Indicator --- */
-.scroll-indicator {
-  position: absolute;
-  bottom: 40px;
-  left: 6vw; /* Aligned with the left text */
-  z-index: 10;
+/* Explore Link */
+.hero-explore {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+  cursor: pointer;
+}
+
+.explore-text {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: #fff;
+}
+
+.explore-line {
+  width: 60px;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.hero-explore:hover .explore-line {
+  width: 100px;
+  background-color: var(--color-accent-gold);
+}
+
+/* Slider Indicator */
+.hero-slider-indicator {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.slider-num {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: #fff;
+  letter-spacing: 0.1em;
+}
+
+.slider-track {
+  width: 120px;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 25%; /* Represents 01 out of 04 */
+  background-color: var(--color-accent-gold);
+}
+
+/* --- Layer 5: Bottom Right Scroll Indicator --- */
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 80px;
+  right: 4vw;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .scroll-text {
   font-family: var(--font-sans);
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: rgba(255, 255, 255, 0.5);
-  writing-mode: vertical-rl; /* Turns the text sideways */
-  transform: rotate(180deg); /* Flips it to read top-to-bottom */
+  letter-spacing: 0.2em;
+  color: #fff;
 }
 
-.scroll-line-container {
+.scroll-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px; /* Aligns with the center of the text above it */
+}
+
+.scroll-line-vertical {
   width: 1px;
-  height: 60px;
-  background-color: rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
 }
 
-/* CSS Animation for the glowing line dropping down continuously */
-.scroll-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background-color: var(--color-accent-gold);
-  animation: dropScroll 2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+.arrow-down {
+  color: #fff;
+  /* Optional: Gentle bounce animation */
+  animation: bounce 2s infinite;
 }
 
-@keyframes dropScroll {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(200%); }
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(6px); }
+  60% { transform: translateY(3px); }
 }
-2. JavaScript: The "15-Frame" Fade Out Animation
-This logic calculates how far the user has scrolled. Because we want it to vanish quickly (within the first ~250px of scrolling, essentially the first fraction of a second), it maps the scroll depth to the element's opacity. The data-speed makes the title, subtitle, and badge vanish at slightly different rates, creating a highly premium parallax depth effect.
-
-JavaScript
-/* =========================================
-   HERO SECTION JS
-   Handles the rapid staggered fade-out on scroll
-========================================= */
-
-document.addEventListener('DOMContentLoaded', () => {
-  const fadeLayers = document.querySelectorAll('.fade-layer');
-  
-  if (fadeLayers.length === 0) return;
-
-  // The maximum scroll distance (in pixels) before elements are completely invisible.
-  // 250px is very quick (roughly your "first 15 frames" of scroll).
-  const maxScrollFade = 250; 
-
-  const handleHeroScroll = () => {
-    const scrollY = window.scrollY;
-
-    fadeLayers.forEach(layer => {
-      // Get the custom speed attribute from the HTML (defaults to 1 if missing)
-      const speed = parseFloat(layer.getAttribute('data-speed')) || 1;
-      
-      // Calculate opacity: starts at 1, goes to 0 as you scroll down
-      let opacity = 1 - ((scrollY * speed) / maxScrollFade);
-      
-      // Clamp opacity between 0 and 1 so it doesn't go negative
-      opacity = Math.max(0, Math.min(1, opacity));
-      
-      // Calculate a slight upward push as it fades (parallax)
-      const translateY = scrollY * speed * 0.3;
-
-      // Apply the styles
-      layer.style.opacity = opacity;
-      layer.style.transform = `translateY(-${translateY}px)`;
-      
-      // Optimization: If opacity is 0, hide it from screen readers/pointer events
-      if (opacity === 0) {
-        layer.style.pointerEvents = 'none';
-      } else {
-        layer.style.pointerEvents = 'auto';
-      }
-    });
-  };
-
-  // Run efficiently on scroll
-  let tickingHero = false;
-  window.addEventListener('scroll', () => {
-    if (!tickingHero) {
-      window.requestAnimationFrame(() => {
-        handleHeroScroll();
-        tickingHero = false;
-      });
-      tickingHero = true;
-    }
-  });
-});
