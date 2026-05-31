@@ -17,7 +17,7 @@ export default function HeroScroll() {
   const frameObj = useRef({ index: 0 });
   
   // Load all 252 frames sequentially
-  const { images } = useImagePreloader('/img_new', 252, {
+  const { images, loaded } = useImagePreloader('/img_new', 252, {
     prefix: 'ezgif-frame-',
     extension: 'jpg',
     padLength: 3,
@@ -141,17 +141,25 @@ export default function HeroScroll() {
       252 // Starts precisely when the final frame finishes
     );
 
-    // 2. The Logo Reveal
-    tl.from('.final-logo',
-      { opacity: 0, y: 50, duration: 40, ease: 'power2.out' },
-      332 // Starts AFTER the white panel has fully settled
-    );
+    // 2. The Unified Page Reveal (All elements fade and slide up in sync)
+    tl.from([
+      '.final-logo',
+      '.nav-item',
+      '.mid-gold-line',
+      '.hero-statement',
+      '.supporting-copy',
+      '.meta-left',
+      '.meta-right',
+      '.vertical-guide',
+      '.bottom-divider',
+      '.scroll-indicator'
+    ], {
+      opacity: 0,
+      y: 40,
+      duration: 40,
+      ease: 'power2.out'
+    }, 332);
 
-    // 3. The Staggered Navbar Reveal
-    tl.from('.nav-item',
-      { opacity: 0, y: 30, stagger: 20, duration: 30, ease: 'power2.out' },
-      372 // Starts strictly AFTER the logo finishes its reveal
-    );
 
   }, { dependencies: [images], scope: containerRef });
 
@@ -165,6 +173,16 @@ export default function HeroScroll() {
       }
     }
   }, [images]);
+
+  // Recalculate ScrollTrigger positions once all 252 frames are loaded
+  useEffect(() => {
+    if (loaded) {
+      const timer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [loaded]);
 
   // Design Variables
   const headingStyle: React.CSSProperties = {
@@ -261,52 +279,142 @@ export default function HeroScroll() {
         This slides up from the bottom exactly after the image scrubbing finishes.
       */}
       <div 
-        className="final-logo-panel absolute top-full left-0 w-full h-full z-40 bg-white flex flex-col items-center justify-center pointer-events-auto"
+        className="final-logo-panel absolute top-full left-0 w-full h-full z-40 flex flex-col items-center justify-between py-12 px-6 md:px-20 pointer-events-auto select-none overflow-hidden"
+        style={{ 
+          isolation: 'isolate',
+          background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)'
+        }}
       >
+        {/* Grain Layer */}
         <div 
-          className="final-logo w-full max-w-[450px] h-48 md:h-64 bg-no-repeat bg-center bg-contain mb-[80px]"
-          style={{ 
-            backgroundImage: `url('https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780135525/ChatGPT_Image_May_30_2026_03_34_07_PM_vddnww.png')`
+          className="pointer-events-none absolute inset-0 z-50"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperAndGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='4' result='bump'/%3E%3CfeDiffuseLighting in='bump' lighting-color='%23ffffff' surfaceScale='2' result='light'%3E%3CfeDistantLight azimuth='45' elevation='60'/%3E%3C/feDiffuseLighting%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' result='grain'/%3E%3CfeColorMatrix type='matrix' values='0.77 0 0 0 0   0 0.64 0 0 0   0 0 0.48 0 0   0 0 0 0.18 0' result='coloredGrain'/%3E%3CfeBlend mode='multiply' in='light' in2='coloredGrain'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperAndGrain)'/%3E%3C/svg%3E")`,
+            opacity: 0.45,
+            mixBlendMode: 'multiply'
           }}
         />
-        
-        {/* Navbar Items that appear below the logo */}
+
+        {/* Vertical Guide Lines */}
+        <div className="vertical-guide absolute left-6 md:left-20 top-[140px] bottom-[80px] w-[1px] bg-[rgba(196,164,124,0.38)] pointer-events-none" />
+        <div className="vertical-guide absolute right-6 md:right-20 top-[140px] bottom-[80px] w-[1px] bg-[rgba(196,164,124,0.38)] pointer-events-none" />
+
+        {/* Vertical Architectural Metadata - Left Side */}
+        <div className="meta-left absolute top-10 left-6 md:left-20 -translate-x-1/2 flex flex-col items-center text-center font-lato text-[11px] md:text-[12px] font-light tracking-[0.25em] text-[#C4A47C] opacity-80 leading-relaxed pointer-events-none">
+          <div>EST.</div>
+          <div>2020</div>
+          <div className="w-4 h-[1px] bg-[#C4A47C]/40 mt-4" />
+        </div>
+
+        {/* Vertical Architectural Metadata - Right Side */}
+        <div className="meta-right absolute top-10 right-6 md:right-20 translate-x-1/2 flex flex-col items-center text-center font-lato text-[11px] md:text-[12px] font-light tracking-[0.25em] text-[#C4A47C] opacity-80 leading-relaxed pointer-events-none">
+          <div>PUNE</div>
+          <div>INDIA</div>
+          <div className="w-4 h-[1px] bg-[#C4A47C]/40 mt-4" />
+        </div>
+
+        {/* Central Content Area (Focal Point) */}
+        <div className="absolute top-0 bottom-[100px] left-1/2 -translate-x-1/2 w-full max-w-[1100px] flex flex-col items-center justify-center z-10 px-6 md:px-16">
+          {/* Logo Container */}
+          <img 
+            src="https://res.cloudinary.com/dcryxjtb3/image/upload/f_auto,q_auto,e_make_transparent/v1780135525/ChatGPT_Image_May_30_2026_03_34_07_PM_vddnww.png"
+            alt="VAΛSTU Logo"
+            className="final-logo w-full max-w-[340px] md:max-w-[380px] h-auto object-contain select-none flex-shrink-0"
+            style={{ 
+              mixBlendMode: 'multiply'
+            }}
+          />
+
+          {/* Navigation Links */}
+          <div 
+            className="flex items-center flex-wrap justify-center gap-6 md:gap-[72px] text-[#2A2826] uppercase mt-8 text-[16px] md:text-[18px] tracking-[0.12em] flex-shrink-0"
+            style={{
+              fontFamily: 'var(--font-lato), sans-serif',
+              fontWeight: 300,
+            }}
+          >
+            {['Philosophy', 'Projects', 'Process', 'Contact'].map((item) => (
+              <div 
+                key={item} 
+                className="nav-item relative cursor-pointer py-2 group text-[#2A2826]/92 hover:text-[#C4A47C]" 
+                onClick={() => {
+                  const el = document.getElementById(item.toLowerCase());
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                {item}
+                <span className="absolute bottom-0 left-1/2 w-0 h-[1px] bg-[#C4A47C] -translate-x-1/2 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full" />
+              </div>
+            ))}
+          </div>
+
+          {/* Small Horizontal Golden Line centered below navigation */}
+          <div 
+            className="mid-gold-line w-20 flex-shrink-0 mt-6"
+            style={{ 
+              height: '2px', 
+              background: 'linear-gradient(to right, #B5946B 0%, #F1DAB7 50%, #B5946B 100%)',
+              boxShadow: '0 0.5px 3px rgba(181, 148, 107, 0.45)',
+            }}
+          />
+
+          {/* Hero Statement */}
+          <h1 
+            className="hero-statement text-center font-light leading-[0.95] max-w-[1100px] mt-6 md:mt-[36px] tracking-tight flex-shrink-0 bg-gradient-to-r from-[#1A1817] via-[#4E4742] to-[#1A1817] bg-clip-text text-transparent"
+            style={{
+              fontFamily: 'var(--font-cormorant), serif',
+              fontSize: 'clamp(32px, 4.5vw, 68px)',
+            }}
+          >
+            Spaces that elevate.<br />
+            Experiences that endure.
+          </h1>
+
+          {/* Supporting Copy */}
+          <p 
+            className="supporting-copy text-center max-w-[700px] mt-4 md:mt-6 px-4 text-[15px] md:text-[18px] leading-[1.8] flex-shrink-0 bg-gradient-to-r from-[#4A4744] via-[#65615D] to-[#4A4744] bg-clip-text text-transparent"
+            style={{
+              fontFamily: 'var(--font-lato), sans-serif',
+              fontWeight: 300,
+            }}
+          >
+            We design with intention, craft with precision<br className="hidden md:inline" /> and build places that inspire for generations.
+          </p>
+        </div>
+
+
+        {/* Scroll Indicator */}
         <div 
-          className="flex items-center flex-wrap justify-center gap-8 md:gap-16 text-[#2A2826] uppercase"
+          className="scroll-indicator absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center text-center text-[#C4A47C] pointer-events-none select-none z-20"
           style={{
-            fontFamily: '"Lato", sans-serif',
-            fontWeight: 400,
-            fontSize: '14px',
-            letterSpacing: '0.15em'
+            fontFamily: 'var(--font-lato), sans-serif',
+            fontSize: '11px',
+            fontWeight: 300,
+            letterSpacing: '0.3em',
           }}
         >
-          {['Philosophy', 'Projects', 'Process', 'Contact'].map((item) => (
-            <div 
-              key={item} 
-              className="nav-item group relative cursor-pointer" 
-              style={{ perspective: '800px', height: '1.2em' }}
-            >
-              <div 
-                className="relative w-full h-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:rotateX(90deg)]" 
-                style={{ transformStyle: 'preserve-3d', transformOrigin: '50% 50% -0.6em' }}
-              >
-                {/* Front Face */}
-                <div 
-                  className="relative text-[#2A2826] h-full flex items-center" 
-                  style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
-                >
-                  {item}
-                </div>
-                {/* Bottom Face (Rotated underneath, becomes front on hover) */}
-                <div 
-                  className="absolute inset-0 text-[#C4A47C] flex items-center" 
-                  style={{ transform: 'rotateX(-90deg) translateY(100%)', transformOrigin: 'top center', backfaceVisibility: 'hidden' }}
-                >
-                  {item}
-                </div>
-              </div>
-            </div>
-          ))}
+          {/* Vertical Golden Line */}
+          <div 
+            className="mb-6"
+            style={{ 
+              width: '2px', 
+              height: '40px', 
+              background: 'linear-gradient(to bottom, #B5946B 0%, #F1DAB7 50%, #B5946B 100%)',
+              boxShadow: '0.5px 0 3px rgba(181, 148, 107, 0.45)',
+            }}
+          />
+          <div>SCROLL TO EXPLORE</div>
+          <svg 
+            className="w-5 h-5 mt-2 text-[#C4A47C] animate-float-arrow" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            strokeWidth={1}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
         </div>
       </div>
     </div>

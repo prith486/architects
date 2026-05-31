@@ -9,17 +9,47 @@
   --font-playfair: "Playfair Display", serif;
   --font-great-vibes: "Great Vibes", cursive;
   --font-ogg: "Ogg", serif;
+  --font-lato: var(--font-lato), sans-serif;
+  --font-cormorant: var(--font-cormorant), serif;
 }
 
 :root {
   --background: #111111;
   --foreground: #ffffff;
+  
+  /* Premium Color Palette */
+  --color-bg-base: #f4f2ee; /* Warm, off-white sand */
+  --color-text-main: #1a1a1a;
+  --color-text-muted: #5c5c5c;
+  --color-accent-gold: #b7955b; /* The authentic architectural gold */
+  
+  /* Typography System */
+  --font-serif: var(--font-playfair), serif;
+  --font-sans: var(--font-lato), sans-serif;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter);
+  font-family: var(--font-sans);
+  color: var(--color-text-main);
+  background-color: var(--color-bg-base);
+  
+  /* The "Grainy Golden Texture" */
+  /* This uses a data URI to generate an instant, lightweight SVG noise texture over the background color */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+@keyframes float-arrow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.animate-float-arrow {
+  animation: float-arrow 2.5s ease-in-out infinite;
 }
 
 /* Lenis default styles to prevent glitches */
@@ -41,4 +71,606 @@ html.lenis, html.lenis body {
 
 .lenis.lenis-smooth iframe {
   pointer-events: none;
+}
+
+.nav-item {
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item:hover {
+  text-shadow: 0 0 1.5px rgba(196, 164, 124, 0.45);
+}
+
+/* =========================================
+   ABOUT US / PHILOSOPHY SECTION STYLES
+   CRITICAL PLACEMENT: Before Project Showcase
+========================================= */
+
+.about-section {
+  width: 100%;
+  max-width: 1600px; /* Widen the layout slightly for a more cinematic feel */
+  margin: 0 auto;
+  padding: 120px 4vw; /* More breathing room */
+}
+
+/* --- Header Typography --- */
+.about-header-container {
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+.about-main-title {
+  font-family: var(--font-serif); /* Apply luxury serif */
+  font-size: clamp(4rem, 8.5vw, 8.5rem);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--color-text-main);
+  margin-bottom: 100px;
+}
+
+/* --- Asymmetrical Grid Layout --- */
+.about-grid-container {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  gap: 60px;
+  position: relative;
+  align-items: flex-start; /* Crucial for sticky positioning to work */
+  z-index: 10;
+}
+
+/* --- Left Column: Sticky Image Container --- */
+.sticky-visual-column {
+  position: sticky;
+  top: 15vh; /* Locks the image vertically in the viewport */
+  height: 70vh; /* Keeps the image large and cinematic */
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.sticky-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.sticky-image-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Creates a subtle dark gradient fading left to right */
+  background: linear-gradient(to right, rgba(0,0,0,0.15), transparent);
+  z-index: 5; /* Sits above the images, below the text */
+  pointer-events: none; /* Ensures it doesn't block interactions */
+}
+
+.sticky-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0; /* All hidden by default, controlled by JS in Part 4 */
+  transition: opacity 0.8s ease-in-out; /* Smooth cinematic crossfade */
+  will-change: opacity;
+}
+
+/* Default state for the first image on load */
+.sticky-img.active {
+  opacity: 1;
+}
+
+/* --- Right Column: Scrolling Narrative --- */
+.scrolling-text-column {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20vh; /* Extra space at the bottom for scroll clearance */
+  scroll-snap-type: y proximity; 
+}
+
+/* Creates the vertical scrolling distance */
+.content-block {
+  min-height: 80vh; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+  scroll-snap-align: center; 
+}
+
+/* --- The Glassmorphism Panel --- */
+.glass-panel {
+  /* True Frosted Glass Effect with Embedded Grain */
+  background: rgba(255, 255, 255, 0.25); /* Fallback */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E"),
+    linear-gradient(rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.20));
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  
+  /* Subtle light reflection edges */
+  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  
+  border-radius: 2px; /* Sharper edges fit architecture better than rounded ones */
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08); /* Deeper, softer shadow */
+  padding: 60px 50px;
+
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 20;
+  transform: translateZ(0); /* Forces Safari hardware acceleration for the blur */
+}
+
+.panel-header {
+  margin-bottom: 24px;
+}
+
+.phase-number {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-accent-gold); /* Inject the premium golden tone */
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Add a delicate horizontal line next to the phase number */
+.phase-number::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background-color: var(--color-accent-gold);
+}
+
+.panel-title {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  font-weight: 400;
+  margin: 0 0 24px 0;
+  color: var(--color-text-main);
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 3px rgba(183, 149, 91, 0.25); /* Premium gold drop shadow effect */
+}
+
+.panel-body {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--color-text-muted);
+  font-weight: 300;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 992px) {
+  .about-grid-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  /* On mobile, standard sticky doesn't work well due to screen height. 
+     We change it to relative flow or a smaller sticky header. */
+  .sticky-visual-column {
+    position: relative;
+    top: 0;
+    height: 50vh;
+    margin-bottom: -20px; /* Slight overlap with first panel */
+    z-index: -1;
+  }
+
+  .content-block {
+    min-height: auto;
+    padding: 30px 20px;
+    margin-bottom: 40px;
+  }
+}
+
+/* =========================================
+   PROCESS & APPROACH SECTION STYLES
+========================================= */
+
+.process-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 120px 4vw 160px;
+  position: relative;
+}
+
+.process-header-container {
+  text-align: center;
+  margin-bottom: 100px;
+}
+
+.process-main-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 6vw, 5rem);
+  color: var(--color-text-main);
+  margin-bottom: 24px;
+}
+
+.process-subtitle {
+  font-family: var(--font-sans);
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.timeline-container {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* The central invisible track that the gold line will draw down */
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1); /* Faint guide line */
+}
+
+/* The actual Gold Line (Starts at height 0, JS will animate it) */
+.timeline-progress-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 0%; /* JS will change this based on scroll */
+  background-color: var(--color-accent-gold);
+  z-index: 5;
+  box-shadow: 0 0 10px rgba(183, 149, 91, 0.5); /* Glowing effect */
+}
+
+.timeline-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  margin-bottom: 80px;
+  opacity: 0; /* Hidden initially for scroll reveal */
+}
+
+/* Left side elements */
+.timeline-item.left {
+  justify-content: flex-start;
+  transform: translateX(-40px); /* Pushed left initially */
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Right side elements */
+.timeline-item.right {
+  justify-content: flex-end;
+  transform: translateX(40px); /* Pushed right initially */
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* When JS adds the .visible class, they slide into place */
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.timeline-content {
+  width: 45%; /* Leaves 10% gap in the middle for the line */
+  position: relative;
+  z-index: 10;
+}
+
+/* The golden dots on the central line */
+.timeline-node {
+  position: absolute;
+  top: 40px; /* Aligns with the top of the card */
+  left: 50%;
+  transform: translateX(-50%) scale(0); /* Starts scaled down to 0 */
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--color-bg-base);
+  border: 2px solid var(--color-accent-gold);
+  z-index: 10;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+}
+
+/* Node pops in when card becomes visible */
+.timeline-item.visible .timeline-node {
+  transform: translateX(-50%) scale(1);
+}
+
+/* Glassmorphism Alt Panel */
+.glass-panel-alt {
+  background: rgba(255, 255, 255, 0.15); /* Fallback */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.06'/%3E%3C/svg%3E"),
+    linear-gradient(rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.10));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 40px;
+  border-radius: 2px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.timeline-phase {
+  font-family: var(--font-sans);
+  color: var(--color-accent-gold);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.timeline-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--color-text-main);
+  margin-bottom: 16px;
+  text-shadow: 0 1px 3px rgba(183, 149, 91, 0.25);
+}
+
+.timeline-body {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  /* Move line to the far left edge */
+  .timeline-container::before,
+  .timeline-progress-line {
+    left: 0;
+    transform: none;
+  }
+  
+  .timeline-item.left,
+  .timeline-item.right {
+    justify-content: flex-end; /* All content pushes right */
+    transform: translateY(30px); /* Both slide up instead of sideways */
+  }
+
+  .timeline-item.visible {
+    transform: translateY(0);
+  }
+
+  .timeline-content {
+    width: 90%; /* Take up most of the screen */
+  }
+
+  /* Move nodes to the left line */
+  .timeline-node {
+    left: -6px; /* Half of the 12px width */
+    transform: scale(0);
+  }
+
+  .timeline-item.visible .timeline-node {
+    transform: scale(1);
+  }
+}
+
+/* =========================================
+   CONTACT & FOOTER STYLES
+========================================= */
+
+.contact-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 120px 4vw;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* --- Left Side Typography --- */
+.contact-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3.5rem, 7vw, 6rem);
+  line-height: 1;
+  color: var(--color-text-main);
+  margin-bottom: 60px;
+}
+
+.gold-text {
+  color: var(--color-accent-gold);
+  font-style: italic;
+}
+
+.contact-details {
+  display: flex;
+  gap: 60px;
+}
+
+.detail-label {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent-gold);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.detail-text {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* --- Right Side Minimal Form --- */
+.contact-form-container {
+  padding: 60px;
+}
+
+.architect-form {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.input-group {
+  position: relative;
+}
+
+/* The invisible input box */
+.input-group input {
+  width: 100%;
+  padding: 10px 0;
+  font-family: var(--font-sans);
+  font-size: 1.2rem;
+  color: var(--color-text-main);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+/* The floating label */
+.input-group label {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: 0.3s ease all;
+}
+
+/* Focus and Float mechanics */
+.input-group input:focus,
+.input-group input:not(:placeholder-shown) {
+  border-bottom-color: var(--color-accent-gold);
+}
+
+.input-group input:focus ~ label,
+.input-group input:not(:placeholder-shown) ~ label {
+  top: -20px;
+  font-size: 0.85rem;
+  color: var(--color-accent-gold);
+  letter-spacing: 0.05em;
+}
+
+/* --- Premium Submit Button --- */
+.premium-submit-btn {
+  align-self: flex-start;
+  margin-top: 20px;
+  padding: 16px 32px;
+  background-color: var(--color-text-main);
+  color: var(--color-bg-base);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.premium-submit-btn:hover {
+  background-color: var(--color-accent-gold);
+  transform: translateY(-2px);
+}
+
+.premium-submit-btn .arrow {
+  transition: transform 0.3s ease;
+}
+
+.premium-submit-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* --- Footer --- */
+.site-footer {
+  width: 100%;
+  padding: 40px 4vw;
+  background-color: #111; /* Sharp dark contrast for the very bottom */
+  color: #fff;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-sans);
+}
+
+.footer-logo {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+.footer-links {
+  display: flex;
+  gap: 32px;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: var(--color-accent-gold);
+}
+
+.footer-legal {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 992px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  
+  .contact-details {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
 }

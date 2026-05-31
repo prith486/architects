@@ -2,8 +2,10 @@
 import { useEffect } from 'react';
 import Lenis from 'lenis';
 import HeroScroll from '@/components/canvas/HeroScroll';
-import ConsultationForm from '@/components/ui/ConsultationForm';
-import TypewriterText from '@/components/ui/TypewriterText';
+import AboutUs from '@/components/about/AboutUs';
+import PortfolioShowcase from '@/components/portfolio/PortfolioShowcase';
+import ProcessTimeline from '@/components/process/ProcessTimeline';
+import ContactFooter from '@/components/ui/ContactFooter';
 
 export default function Home() {
   useEffect(() => {
@@ -27,34 +29,36 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="bg-background min-h-screen text-foreground font-inter">
+    <main className="min-h-screen">
       {/* Single seamless canvas experience for all frames */}
       <HeroScroll />
-      
-      {/* Philosophy Section */}
-      <section id="philosophy" className="min-h-screen flex items-center justify-center bg-background py-24 px-6 relative z-10">
-         <div className="max-w-4xl mx-auto text-center space-y-12">
-            <h2 className="text-4xl md:text-6xl font-playfair tracking-widest uppercase text-primary">Our Philosophy</h2>
-            <TypewriterText 
-              text='"We do not just build houses; we curate environments. By bridging the gap between minimalist architecture and deeply personal interior design, we create sanctuaries that breathe with the landscape."'
-              className="text-xl md:text-3xl font-light leading-relaxed text-white/90"
-            />
-         </div>
-      </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="min-h-screen flex items-center justify-center bg-background py-24 px-6 border-t border-white/5 relative overflow-hidden z-10">
-        {/* Subtle background gradient */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-        
-        <div className="w-full relative z-10">
-          <ConsultationForm />
+      {/* About Us / Philosophy Section (Sticky Scroll) */}
+      <section id="about-wrapper" className="w-full relative z-10" style={{ background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)' }}>
+        {/* Paper Emboss Grain Layer - High Intensity */}
+        <div 
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperAndGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='4' result='bump'/%3E%3CfeDiffuseLighting in='bump' lighting-color='%23ffffff' surfaceScale='3' result='light'%3E%3CfeDistantLight azimuth='45' elevation='60'/%3E%3C/feDiffuseLighting%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' result='grain'/%3E%3CfeColorMatrix type='matrix' values='0.77 0 0 0 0   0 0.64 0 0 0   0 0 0.48 0 0   0 0 0 0.18 0' result='coloredGrain'/%3E%3CfeBlend mode='multiply' in='light' in2='coloredGrain'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperAndGrain)'/%3E%3C/svg%3E")`,
+            opacity: 0.95,
+            mixBlendMode: 'multiply'
+          }}
+        />
+        <div className="relative z-10">
+          <AboutUs />
         </div>
       </section>
       
-      <footer className="py-8 text-center text-white/40 text-sm tracking-widest uppercase border-t border-white/10 relative z-10">
-        &copy; {new Date().getFullYear()} All Rights Reserved.
-      </footer>
+      {/* Portfolio Showcase Section */}
+      <section id="philosophy" className="relative z-10">
+        <PortfolioShowcase />
+      </section>
+
+      {/* Process Timeline Section */}
+      <ProcessTimeline />
+
+      {/* Contact & Footer Section */}
+      <ContactFooter />
     </main>
   );
 }
