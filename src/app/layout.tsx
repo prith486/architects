@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Great_Vibes, Lato, Cormorant_Garamond } from "next/font/google";
+import { Inter, Playfair_Display, Great_Vibes, Lato, Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -30,6 +30,12 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
 });
 
+const dmSans = DM_Sans({
+  weight: ["300", "500"],
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Defining Modern Elegance",
   description: "Spaces Crafted for Living. Where structural integrity meets curated warmth.",
@@ -43,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${greatVibes.variable} ${lato.variable} ${cormorant.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} ${greatVibes.variable} ${lato.variable} ${cormorant.variable} ${dmSans.variable} h-full antialiased`}
     >
       <head>
         <link rel="preload" href="/assets/about-precision.webp" as="image" />

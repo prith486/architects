@@ -5,6 +5,10 @@
   --color-background: #111111;
   --color-foreground: #ffffff;
   --color-primary: #D4AF37;
+  --color-gold-primary: #C9A96E;
+  --color-gold-muted: #B8914A;
+  --color-gold-light: #DFC28A;
+  --color-gold-shimmer: #E8D5A3;
   --font-inter: "Inter", sans-serif;
   --font-playfair: "Playfair Display", serif;
   --font-great-vibes: "Great Vibes", cursive;
@@ -33,6 +37,11 @@ body {
   color: var(--color-text-main);
   background: radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%);
   background-attachment: fixed;
+}
+
+html,
+body {
+  overflow-x: clip;
 }
 
 body::before {
