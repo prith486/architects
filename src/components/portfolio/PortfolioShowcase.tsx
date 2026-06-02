@@ -1,111 +1,22 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { PROJECTS } from '@/data/projects';
+import type { Project } from '@/data/projects';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-interface Project {
-  id: number;
-  title: string;
-  category: 'Résidentiel' | 'Retail' | 'Hospitality';
-  image: string;
-  aspect: string;
-  color: string;
-  logoText: string;
-}
-
-const PROJECTS: Project[] = [
-  {
-    id: 1,
-    title: "Maison Travertine",
-    category: "Résidentiel",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800",
-    aspect: "aspect-[3/4]", // Portrait
-    color: "#3F4E3F",
-    logoText: "ms"
-  },
-  {
-    id: 2,
-    title: "Le Pavilion Retail",
-    category: "Retail",
-    image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=800",
-    aspect: "aspect-[4/3]", // Landscape
-    color: "#9E826C",
-    logoText: "ms"
-  },
-  {
-    id: 3,
-    title: "L'Oasis Lounge",
-    category: "Hospitality",
-    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800",
-    aspect: "aspect-[1/1]", // Square
-    color: "#5C3A21",
-    logoText: "ms"
-  },
-  {
-    id: 4,
-    title: "Villa Concrete",
-    category: "Résidentiel",
-    image: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?q=80&w=800",
-    aspect: "aspect-[4/3]", // Landscape
-    color: "#4A525A",
-    logoText: "ms"
-  },
-  {
-    id: 5,
-    title: "The Sanctuary",
-    category: "Hospitality",
-    image: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=800",
-    aspect: "aspect-[1/1]", // Square
-    color: "#2C3539",
-    logoText: "ms"
-  },
-  {
-    id: 6,
-    title: "Galerie Moderne",
-    category: "Retail",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800",
-    aspect: "aspect-[3/4]", // Portrait
-    color: "#8E5B3C",
-    logoText: "ms"
-  },
-  {
-    id: 7,
-    title: "Aero Penthouse",
-    category: "Résidentiel",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800",
-    aspect: "aspect-[1/1]", // Square
-    color: "#8C92AC",
-    logoText: "ms"
-  },
-  {
-    id: 8,
-    title: "Brutalist Oasis",
-    category: "Résidentiel",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800",
-    aspect: "aspect-[3/4]", // Portrait
-    color: "#4F4A41",
-    logoText: "ms"
-  },
-  {
-    id: 9,
-    title: "Ethereal Showroom",
-    category: "Retail",
-    image: "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?q=80&w=800",
-    aspect: "aspect-[4/3]", // Landscape
-    color: "#7D6B58",
-    logoText: "ms"
-  }
-];
-
 export default function PortfolioShowcase() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const gridShellRef = useRef<HTMLDivElement>(null);
   
   // Refs to measure placeholders and cards
   const placeholderRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -115,6 +26,10 @@ export default function PortfolioShowcase() {
   const col1 = PROJECTS.filter((_, i) => i % 3 === 0);
   const col2 = PROJECTS.filter((_, i) => i % 3 === 1);
   const col3 = PROJECTS.filter((_, i) => i % 3 === 2);
+
+  const handleProjectClick = (slug: string) => {
+    router.push(`/projects/${slug}`);
+  };
 
   const renderProjectCard = (project: Project, index: number) => {
     return (
@@ -130,6 +45,7 @@ export default function PortfolioShowcase() {
           style={{
             transformOrigin: 'center center',
           }}
+          onClick={() => handleProjectClick(project.slug)}
         >
           {/* Background Project Image */}
           <img 
@@ -166,7 +82,7 @@ export default function PortfolioShowcase() {
             </div>
 
             {/* 
-              Embossed Stylized Logo (VAΛSTU)
+              Embossed Stylized Logo (VAÎ›STU)
               3D textural background stamped into the colored block.
             */}
             <div 
@@ -177,7 +93,7 @@ export default function PortfolioShowcase() {
                 mixBlendMode: 'overlay',
               }}
             >
-              VAΛSTU
+              {project.logoText}
             </div>
           </div>
         </div>
@@ -189,6 +105,34 @@ export default function PortfolioShowcase() {
     if (!containerRef.current || !triggerRef.current) return;
 
     let tl: gsap.core.Timeline | null = null;
+    let refreshTimer: NodeJS.Timeout | null = null;
+
+    const reserveFinalGridHeight = () => {
+      const trigger = triggerRef.current;
+      const gridShell = gridShellRef.current;
+      if (!trigger || !gridShell) return;
+
+      const finalCardBottom = placeholderRefs.current.reduce((maxBottom, placeholder) => {
+        if (!placeholder) return maxBottom;
+        return Math.max(maxBottom, placeholder.offsetTop + placeholder.offsetHeight);
+      }, 0);
+
+      const bottomPadding = window.innerWidth < 768 ? 72 : 96;
+      const reservedHeight = Math.max(
+        window.innerHeight,
+        Math.ceil(gridShell.offsetTop + finalCardBottom + bottomPadding)
+      );
+
+      trigger.style.minHeight = `${reservedHeight}px`;
+    };
+
+    const scheduleRefresh = () => {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        reserveFinalGridHeight();
+        ScrollTrigger.refresh();
+      }, 80);
+    };
 
     // We need to wait for layout and measurements
     const runMorphAnimation = () => {
@@ -201,6 +145,7 @@ export default function PortfolioShowcase() {
           t.kill();
         }
       });
+      reserveFinalGridHeight();
 
       const viewportW = window.innerWidth;
       const viewportH = window.innerHeight;
@@ -284,10 +229,12 @@ export default function PortfolioShowcase() {
           duration: 1
         }, 0.1);
       });
+
+      scheduleRefresh();
     };
 
     // Run after a short delay to ensure browser layout is ready
-    let timers: NodeJS.Timeout[] = [];
+    const timers: NodeJS.Timeout[] = [];
     
     timers.push(setTimeout(() => {
       runMorphAnimation();
@@ -307,11 +254,19 @@ export default function PortfolioShowcase() {
     // Handle resize and layout shifts
     const handleResizeOrLoad = () => {
       runMorphAnimation();
-      ScrollTrigger.refresh();
+      scheduleRefresh();
     };
 
     window.addEventListener('resize', handleResizeOrLoad);
     window.addEventListener('load', handleResizeOrLoad);
+
+    const watchedImages = Array.from(containerRef.current.querySelectorAll('img'));
+    watchedImages.forEach((img) => {
+      if (!img.complete) {
+        img.addEventListener('load', scheduleRefresh, { once: true });
+        img.addEventListener('error', scheduleRefresh, { once: true });
+      }
+    });
 
     // Optional: Setup a ResizeObserver on the document body to catch image load layout shifts
     let resizeObserver: ResizeObserver | null = null;
@@ -321,7 +276,7 @@ export default function PortfolioShowcase() {
         clearTimeout(timers[timers.length - 1]);
         const debounced = setTimeout(() => {
           runMorphAnimation();
-          ScrollTrigger.refresh();
+          scheduleRefresh();
         }, 150);
         timers.push(debounced);
       });
@@ -330,8 +285,13 @@ export default function PortfolioShowcase() {
 
     return () => {
       timers.forEach(clearTimeout);
+      if (refreshTimer) clearTimeout(refreshTimer);
       window.removeEventListener('resize', handleResizeOrLoad);
       window.removeEventListener('load', handleResizeOrLoad);
+      watchedImages.forEach((img) => {
+        img.removeEventListener('load', scheduleRefresh);
+        img.removeEventListener('error', scheduleRefresh);
+      });
       if (resizeObserver) resizeObserver.disconnect();
       
       if (tl) {
@@ -347,7 +307,7 @@ export default function PortfolioShowcase() {
   }, { scope: containerRef });
 
   return (
-    <div ref={triggerRef} className="relative w-full min-h-screen bg-[#111111] overflow-x-hidden overflow-y-visible">
+    <div ref={triggerRef} className="relative w-full min-h-screen bg-[#111111] overflow-x-clip overflow-y-visible">
       {/* 
         SMUDGE TRANSITION LAYER AT THE TOP 
         Blends the cream background of the HeroScroll panel smoothly into this section's dark background.
@@ -395,7 +355,7 @@ export default function PortfolioShowcase() {
           This is the destination layout. The placeholders define the grid, 
           while the actual cards animate on top of them.
         */}
-        <div className="w-full max-w-[1280px] mx-auto mt-12 md:mt-16 z-20">
+        <div ref={gridShellRef} className="w-full max-w-[1280px] mx-auto mt-12 md:mt-16 z-20">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
             {/* Column 1 */}
             <div className="flex flex-col gap-6 md:gap-8">
