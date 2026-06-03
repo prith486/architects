@@ -13,7 +13,12 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = ['Philosophy', 'Projects', 'Process', 'Contact'];
+  const navItems = [
+    { label: 'Philosophy', href: '/#philosophy' },
+    { label: 'Projects', href: '/#projects' },
+    { label: 'Process', href: '/#process' },
+    { label: 'Contact', href: '/#contact' },
+  ];
 
   return (
     <>
@@ -42,11 +47,11 @@ export default function Header() {
           <nav className="hidden lg:flex gap-12 text-white/70 text-xs font-inter uppercase tracking-[0.2em]">
             {navItems.map((item) => (
               <a 
-                key={item} 
-                href={`#${item.toLowerCase()}`} 
+                key={item.label}
+                href={item.href}
                 className="relative group hover:text-white transition-colors duration-500 py-2"
               >
-                {item}
+                {item.label}
                 <span className="absolute left-0 bottom-0 w-full h-[1px] bg-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out" />
               </a>
             ))}
@@ -76,17 +81,17 @@ export default function Header() {
             className="fixed inset-0 z-40 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center lg:hidden"
           >
             <nav className="flex flex-col gap-10 text-center">
-              {navItems.map((item, i) => (
+            {navItems.map((item, i) => (
                 <motion.a
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
+                  key={item.label}
+                  href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-3xl font-playfair tracking-widest text-white/80 hover:text-primary transition-colors"
                 >
-                  {item}
+                  {item.label}
                 </motion.a>
               ))}
             </nav>

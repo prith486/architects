@@ -41,6 +41,11 @@ export default function CinematicOrb() {
       className="absolute bottom-[24px] right-[84px] z-50 pointer-events-auto"
     >
       <motion.button
+        type="button"
+        aria-label="Return to main page"
+        onClick={() => {
+          window.location.href = '/#philosophy';
+        }}
         initial="idle"
         whileHover="hover"
         animate="idle"

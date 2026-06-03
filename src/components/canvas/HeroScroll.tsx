@@ -15,6 +15,12 @@ export default function HeroScroll() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameObj = useRef({ index: 0 });
+  const navItems = [
+    { label: 'Philosophy', targetId: 'philosophy' },
+    { label: 'Projects', targetId: 'projects' },
+    { label: 'Process', targetId: 'process' },
+    { label: 'Contact', targetId: 'contact' },
+  ];
   
   // Load all 252 frames sequentially
   const { images, loaded } = useImagePreloader('/img_new', 252, {
@@ -378,18 +384,18 @@ export default function HeroScroll() {
               fontWeight: 600,
             }}
           >
-            {['Philosophy', 'Projects', 'Process', 'Contact'].map((item) => (
+            {navItems.map((item) => (
               <div 
-                key={item} 
+                key={item.label}
                 className="nav-item relative cursor-pointer py-2 group text-[#1a1a1a] hover:text-[#8c6200] transition-colors" 
                 onClick={() => {
-                  const el = document.getElementById(item.toLowerCase());
+                  const el = document.getElementById(item.targetId);
                   if (el) {
                     el.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
               >
-                {item}
+                {item.label}
                 <span className="absolute bottom-0 left-1/2 w-0 h-[1px] bg-[#C4A47C] -translate-x-1/2 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full" />
               </div>
             ))}

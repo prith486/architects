@@ -73,7 +73,7 @@ export default function ProcessTimeline() {
   }, []);
 
   return (
-    <section id="process-timeline" ref={sectionRef} className="process-section relative z-10 w-full">
+    <section id="process" ref={sectionRef} className="process-section relative z-10 w-full">
       <div className="process-header-container">
         <h2 className="process-main-title">The Blueprint.</h2>
         <p className="process-subtitle">A rigorous approach from conceptual sketch to built reality.</p>

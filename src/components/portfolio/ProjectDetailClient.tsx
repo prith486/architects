@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
@@ -179,6 +179,20 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
     backgroundRepeat: 'repeat',
   };
 
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    const resetFrame = window.requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(resetFrame);
+    };
+  }, [project.slug]);
+
   useEffect(() => {
     if (!heroSectionRef.current || !imageContainerRef.current) return;
 
@@ -242,7 +256,7 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
       {/* Minimal navigation overlay */}
       <div className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-6 flex items-start justify-end pointer-events-none">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/#projects')}
           className="group fixed top-8 left-8 z-50 inline-flex items-center gap-3 border border-[#E5E3DF] bg-[#FAF9F7]/70 px-4 py-2 font-[var(--font-dm-sans)] text-[11px] font-medium uppercase tracking-[0.18em] text-[#9E9B95] backdrop-blur-sm transition-all duration-300 hover:border-[#C8C5BF] hover:text-[#3D3D3A] pointer-events-auto"
         >
           <span className="block h-px w-4 bg-gold-primary/50 transition-all duration-300 ease-out group-hover:w-6 group-hover:bg-gold-primary" />

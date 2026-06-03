@@ -34,7 +34,7 @@ export default function Home() {
       <HeroScroll />
 
       {/* About Us / Philosophy Section (Sticky Scroll) */}
-      <section id="about-wrapper" className="w-full relative z-10" style={{ background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)' }}>
+      <section id="philosophy" className="w-full relative z-10" style={{ background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)' }}>
         {/* Paper Emboss Grain Layer - High Intensity */}
         <div 
           className="pointer-events-none absolute inset-0 z-0"
@@ -50,7 +50,7 @@ export default function Home() {
       </section>
       
       {/* Portfolio Showcase Section */}
-      <section id="philosophy" className="relative z-10">
+      <section id="projects" className="relative z-10">
         <PortfolioShowcase />
       </section>
 
