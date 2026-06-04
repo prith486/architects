@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import CinematicShowreel from '@/components/CinematicShowreel';
 
 export default function AboutUs() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,9 +56,10 @@ export default function AboutUs() {
         <h2 className="about-main-title text-[#111111] text-center">
           Calculated <span className="gold-text-premium">Vision.</span> <br />Tactile <span className="gold-text-premium">Reality.</span>
         </h2>
-        <p className="about-subtitle text-center max-w-[800px] mt-2 mb-16 text-[16px] md:text-[20px] leading-[1.8] text-[#5c5c5c] font-light font-lato">
+        <p className="about-subtitle text-center max-w-[800px] mt-2 mb-8 text-[16px] md:text-[20px] leading-[1.8] text-[#5c5c5c] font-light font-lato">
           True architecture begins long before the foundation is laid. It starts with a profound dialogue between human intuition, rigorous engineering, and the physical environment.
         </p>
+        <CinematicShowreel />
       </div>
 
       <div className="about-grid-container">

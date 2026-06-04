@@ -1,14 +1,22 @@
 'use client';
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroScroll from '@/components/canvas/HeroScroll';
+import PedigreeMarquee from '@/components/PedigreeMarquee';
 import AboutUs from '@/components/about/AboutUs';
 import PortfolioShowcase from '@/components/portfolio/PortfolioShowcase';
+import VisionBuilder from '@/components/VisionBuilder';
 import ProcessTimeline from '@/components/process/ProcessTimeline';
 import ContactFooter from '@/components/ui/ContactFooter';
 
 export default function Home() {
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
@@ -19,19 +27,30 @@ export default function Home() {
       touchMultiplier: 2,
     });
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    // Synchronize Lenis scrolling with GSAP ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
 
-    return () => lenis.destroy();
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove((time) => {
+        lenis.raf(time * 1000);
+      });
+      lenis.destroy();
+    };
   }, []);
 
   return (
     <main className="min-h-screen">
       {/* Single seamless canvas experience for all frames */}
       <HeroScroll />
+
+      {/* Social Proof Marquee */}
+      <PedigreeMarquee />
 
       {/* About Us / Philosophy Section (Sticky Scroll) */}
       <section id="about-wrapper" className="w-full relative z-10" style={{ background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)' }}>
@@ -50,12 +69,17 @@ export default function Home() {
       </section>
       
       {/* Portfolio Showcase Section */}
-      <section id="philosophy" className="relative z-10">
+      <section id="philosophy" className="relative z-10 mb-20">
         <PortfolioShowcase />
       </section>
 
+      {/* Gamified Vision Builder Section - Added massive spacing to ensure no merging */}
+      <VisionBuilder />
+
       {/* Process Timeline Section */}
-      <ProcessTimeline />
+      <div className="mt-20">
+        <ProcessTimeline />
+      </div>
 
       {/* Contact & Footer Section */}
       <ContactFooter />
