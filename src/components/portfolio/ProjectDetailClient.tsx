@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
@@ -178,20 +178,6 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
     backgroundSize: 'auto, auto, auto, 360px 520px',
     backgroundRepeat: 'repeat',
   };
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-
-    const resetFrame = window.requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(resetFrame);
-    };
-  }, [project.slug]);
 
   useEffect(() => {
     if (!heroSectionRef.current || !imageContainerRef.current) return;

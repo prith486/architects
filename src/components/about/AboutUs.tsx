@@ -1,9 +1,18 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import {
+  ABOUT_PHILOSOPHY_FALLBACK,
+  mapAboutPhilosophyData,
+  type AboutPhilosophyData,
+  type SanityAboutPhilosophyDocument,
+} from '@/sanity/lib/aboutPhilosophyMapper';
+import { client } from '@/sanity/lib/client';
+import { aboutPhilosophyQuery } from '@/sanity/lib/queries';
 
 export default function AboutUs() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [aboutContent, setAboutContent] = useState<AboutPhilosophyData>(ABOUT_PHILOSOPHY_FALLBACK);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -47,16 +56,41 @@ export default function AboutUs() {
     }
 
     return () => scrollObserver.disconnect();
+  }, [aboutContent.panels]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    client
+      .fetch<SanityAboutPhilosophyDocument | null>(aboutPhilosophyQuery)
+      .then((document) => {
+        if (isMounted) {
+          setAboutContent(mapAboutPhilosophyData(document));
+        }
+      })
+      .catch((error) => {
+        console.warn('Sanity about/philosophy fetch failed. Using hardcoded fallback.', error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
     <section id="about-us" className="about-section" ref={containerRef}>
       <div className="about-header-container flex flex-col items-center">
         <h2 className="about-main-title text-[#111111] text-center">
-          Calculated <span className="gold-text-premium">Vision.</span> <br />Tactile <span className="gold-text-premium">Reality.</span>
+          {aboutContent.headingLines.map((line, index) => (
+            <Fragment key={`${line.prefix}-${line.accent}-${index}`}>
+              {line.prefix && `${line.prefix} `}
+              <span className="gold-text-premium">{line.accent}</span>
+              {index < aboutContent.headingLines.length - 1 && <br />}
+            </Fragment>
+          ))}
         </h2>
         <p className="about-subtitle text-center max-w-[800px] mt-2 mb-16 text-[16px] md:text-[20px] leading-[1.8] text-[#5c5c5c] font-light font-lato">
-          True architecture begins long before the foundation is laid. It starts with a profound dialogue between human intuition, rigorous engineering, and the physical environment.
+          {aboutContent.subtitle}
         </p>
       </div>
 
@@ -65,44 +99,25 @@ export default function AboutUs() {
         {/* Left Column: Sticky Image Wrapper */}
         <div className="sticky-visual-column">
           <div className="sticky-image-wrapper">
-            <img src="/assets/about-vision.webp" alt="Architectural Drafting Process" className="sticky-img" id="img-vision" />
-            <img src="/assets/about-precision.webp" alt="Structural Precision in Architecture" className="sticky-img" id="img-precision" />
-            <img src="/assets/about-reality.webp" alt="Modern Living Space Harmony" className="sticky-img" id="img-reality" />
+            {aboutContent.panels.map((panel) => (
+              <img key={panel.key} src={panel.image} alt={panel.alt} className="sticky-img" id={`img-${panel.key}`} />
+            ))}
           </div>
         </div>
 
         {/* Right Column: Scrolling Narrative */}
         <div className="scrolling-text-column">
-          
-          <article className="glass-panel content-block" id="content-vision">
-            <div className="panel-header">
-              <span className="phase-number">01</span>
-              <h3 className="panel-title">Cadrage & Intention</h3>
-            </div>
-            <p className="panel-body">
-              Every millimeter is calculated. Every angle is deliberate. Our philosophy begins with deep listening and conceptual drafting. We believe that true harmony in design starts at the intersection of raw imagination and meticulous planning on the drafting table.
-            </p>
-          </article>
-
-          <article className="glass-panel content-block" id="content-precision">
-            <div className="panel-header">
-              <span className="phase-number">02</span>
-              <h3 className="panel-title">Absolute Precision</h3>
-            </div>
-            <p className="panel-body">
-              We bridge the gap between the drafted line and the built environment. Through advanced 3D rendering and rigorous engineering, we ensure that the structural integrity of our spaces matches their aesthetic ambition. Precision is not an option; it is our foundation.
-            </p>
-          </article>
-
-          <article className="glass-panel content-block" id="content-reality">
-            <div className="panel-header">
-              <span className="phase-number">03</span>
-              <h3 className="panel-title">Living Reality</h3>
-            </div>
-            <p className="panel-body">
-              We do not just build structures; we curate spaces designed for the human experience. By blending sustainable materials with intuitive layouts, we craft enduring environments that inspire for generations. This is architecture shaped by true stories.
-            </p>
-          </article>
+          {aboutContent.panels.map((panel) => (
+            <article key={panel.key} className="glass-panel content-block" id={`content-${panel.key}`}>
+              <div className="panel-header">
+                <span className="phase-number">{panel.number}</span>
+                <h3 className="panel-title">{panel.title}</h3>
+              </div>
+              <p className="panel-body">
+                {panel.description}
+              </p>
+            </article>
+          ))}
 
         </div>
       </div>

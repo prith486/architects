@@ -2,10 +2,26 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import {
+  NAVIGATION_FALLBACK,
+  mapNavigationData,
+  type NavigationData,
+  type SanityNavigationDocument,
+} from '@/sanity/lib/navigationMapper';
+import {
+  SITE_SETTINGS_FALLBACK,
+  mapSiteSettingsData,
+  type SiteSettingsData,
+  type SanitySiteSettingsDocument,
+} from '@/sanity/lib/siteSettingsMapper';
+import { client } from '@/sanity/lib/client';
+import { navigationQuery, siteSettingsQuery } from '@/sanity/lib/queries';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navigation, setNavigation] = useState<NavigationData>(NAVIGATION_FALLBACK);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsData>(SITE_SETTINGS_FALLBACK);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -13,16 +29,32 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { label: 'Philosophy', href: '/#philosophy' },
-    { label: 'Projects', href: '/#projects' },
-    { label: 'Process', href: '/#process' },
-    { label: 'Contact', href: '/#contact' },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.all([
+      client.fetch<SanityNavigationDocument | null>(navigationQuery),
+      client.fetch<SanitySiteSettingsDocument | null>(siteSettingsQuery),
+    ])
+      .then(([navigationDocument, siteSettingsDocument]) => {
+        if (isMounted) {
+          setNavigation(mapNavigationData(navigationDocument));
+          setSiteSettings(mapSiteSettingsData(siteSettingsDocument));
+        }
+      })
+      .catch((error) => {
+        console.warn('Sanity navigation/site settings fetch failed. Using hardcoded fallback.', error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <>
       <motion.header
+        aria-label={siteSettings.studioName}
         className={`fixed top-0 w-full z-50 transition-all duration-700 ease-in-out ${
           scrolled || mobileMenuOpen
             ? 'bg-black/90 backdrop-blur-xl border-b border-primary/20 py-4 shadow-[0_4px_30px_rgba(0,0,0,0.3)]' 
@@ -45,7 +77,7 @@ export default function Header() {
           
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex gap-12 text-white/70 text-xs font-inter uppercase tracking-[0.2em]">
-            {navItems.map((item) => (
+            {navigation.items.map((item) => (
               <a 
                 key={item.label}
                 href={item.href}
@@ -60,10 +92,10 @@ export default function Header() {
           {/* Actions */}
           <div className="flex items-center gap-6 w-32 justify-end">
             <a 
-              href="#contact" 
+              href={navigation.ctaHref} 
               className="flex items-center justify-center px-5 py-2 md:px-8 md:py-2.5 border border-primary text-primary text-[10px] md:text-[11px] uppercase tracking-[0.2em] hover:bg-primary/10 transition-all duration-500 rounded-md group relative overflow-hidden font-medium"
             >
-              <span className="relative z-10">INQUIRE</span>
+              <span className="relative z-10">{navigation.ctaLabel}</span>
               <div className="absolute inset-0 bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </a>
           </div>
@@ -81,7 +113,7 @@ export default function Header() {
             className="fixed inset-0 z-40 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center lg:hidden"
           >
             <nav className="flex flex-col gap-10 text-center">
-            {navItems.map((item, i) => (
+            {navigation.items.map((item, i) => (
                 <motion.a
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

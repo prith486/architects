@@ -1,0 +1,317 @@
+import {defineArrayMember, defineField, defineType} from 'sanity'
+
+const cardAspectOptions = [
+  {title: '3/4', value: 'aspect-[3/4]'},
+  {title: '4/3', value: 'aspect-[4/3]'},
+  {title: '1/1', value: 'aspect-[1/1]'},
+]
+
+export const project = defineType({
+  name: 'project',
+  title: 'Project',
+  type: 'document',
+  groups: [
+    {name: 'basic', title: 'Basic Information'},
+    {name: 'card', title: 'Portfolio Card Settings'},
+    {name: 'detail', title: 'Project Detail Page'},
+    {name: 'seo', title: 'SEO'},
+  ],
+  fields: [
+    defineField({
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      group: 'basic',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      group: 'basic',
+      options: {
+        source: 'title',
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      group: 'basic',
+      options: {
+        list: [
+          {title: 'Residentiel', value: 'Residentiel'},
+          {title: 'Retail', value: 'Retail'},
+          {title: 'Hospitality', value: 'Hospitality'},
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'featuredProject',
+      title: 'Featured Project',
+      type: 'boolean',
+      group: 'basic',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sort Order',
+      type: 'number',
+      group: 'basic',
+      initialValue: 0,
+      validation: (Rule) => Rule.required().integer(),
+    }),
+    defineField({
+      name: 'cardImage',
+      title: 'Card Image',
+      type: 'imageWithAlt',
+      group: 'card',
+      description: 'Optional uploaded Sanity image. Use Card Image URL as a temporary external fallback.',
+    }),
+    defineField({
+      name: 'cardImageUrl',
+      title: 'Card Image URL',
+      type: 'url',
+      group: 'card',
+      description: 'External fallback image URL used until a Sanity image asset is uploaded.',
+      validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
+    }),
+    defineField({
+      name: 'cardAspect',
+      title: 'Card Aspect',
+      type: 'string',
+      group: 'card',
+      description: 'Controlled values only. PortfolioShowcase measurements depend on predictable card dimensions.',
+      options: {
+        list: cardAspectOptions,
+        layout: 'radio',
+      },
+      initialValue: 'aspect-[3/4]',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'cardColor',
+      title: 'Card Color',
+      type: 'string',
+      group: 'card',
+      description: 'Use a CSS color value, for example #3F4E3F.',
+      validation: (Rule) =>
+        Rule.required().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, {
+          name: 'hex color',
+          invert: false,
+        }),
+    }),
+    defineField({
+      name: 'logoText',
+      title: 'Logo Text',
+      type: 'string',
+      group: 'card',
+      validation: (Rule) => Rule.required().max(12),
+    }),
+    defineField({
+      name: 'heroImage',
+      title: 'Hero Image',
+      type: 'imageWithAlt',
+      group: 'detail',
+      description: 'Optional uploaded Sanity image. Use Hero Image URL as a temporary external fallback.',
+    }),
+    defineField({
+      name: 'heroImageUrl',
+      title: 'Hero Image URL',
+      type: 'url',
+      group: 'detail',
+      description: 'External fallback image URL used until a Sanity image asset is uploaded.',
+      validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
+    }),
+    defineField({
+      name: 'heroCaption',
+      title: 'Hero Caption',
+      type: 'string',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'metadata',
+      title: 'Project Metadata',
+      type: 'projectMetadata',
+      group: 'detail',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'narrativeHeading',
+      title: 'Narrative Heading',
+      type: 'string',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'narrativeParagraphs',
+      title: 'Narrative Paragraphs',
+      type: 'array',
+      group: 'detail',
+      of: [defineArrayMember({type: 'text', rows: 4})],
+    }),
+    defineField({
+      name: 'galleryTitle',
+      title: 'Gallery Title',
+      type: 'string',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'galleryItems',
+      title: 'Gallery Items',
+      type: 'array',
+      group: 'detail',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'galleryItem',
+          title: 'Gallery Item',
+          fields: [
+            defineField({
+              name: 'image',
+              title: 'Image',
+              type: 'imageWithAlt',
+              description: 'Optional uploaded Sanity image. Use Image URL as a temporary external fallback.',
+            }),
+            defineField({
+              name: 'imageUrl',
+              title: 'Image URL',
+              type: 'url',
+              description: 'External fallback image URL used until a Sanity image asset is uploaded.',
+              validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
+            }),
+            defineField({
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'label',
+              subtitle: 'image.alt',
+              media: 'image.image',
+            },
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'designIntentHeading',
+      title: 'Design Intent Heading',
+      type: 'string',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'designIntentBody',
+      title: 'Design Intent Body Content',
+      type: 'richText',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'materialityHeading',
+      title: 'Materiality Heading',
+      type: 'string',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'materialityBody',
+      title: 'Materiality Body Content',
+      type: 'richText',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'materialityImage',
+      title: 'Materiality Supporting Image',
+      type: 'imageWithAlt',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'materialityImageUrl',
+      title: 'Materiality Supporting Image URL',
+      type: 'url',
+      group: 'detail',
+      description: 'External fallback image URL used until a Sanity image asset is uploaded.',
+      validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
+    }),
+    defineField({
+      name: 'cinematicQuote',
+      title: 'Cinematic Quote',
+      type: 'text',
+      rows: 3,
+      group: 'detail',
+    }),
+    defineField({
+      name: 'cinematicQuoteAttribution',
+      title: 'Cinematic Quote Attribution',
+      type: 'string',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'cinematicQuoteBackgroundImage',
+      title: 'Cinematic Quote Background Image',
+      type: 'imageWithAlt',
+      group: 'detail',
+    }),
+    defineField({
+      name: 'cinematicQuoteBackgroundImageUrl',
+      title: 'Cinematic Quote Background Image URL',
+      type: 'url',
+      group: 'detail',
+      description: 'External fallback image URL used until a Sanity image asset is uploaded.',
+      validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
+    }),
+    defineField({
+      name: 'relatedProjects',
+      title: 'Related Projects',
+      type: 'array',
+      group: 'detail',
+      of: [
+        defineArrayMember({
+          type: 'reference',
+          to: [{type: 'project'}],
+          options: {
+            disableNew: true,
+          },
+        }),
+      ],
+      validation: (Rule) => Rule.unique(),
+    }),
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seoFields',
+      group: 'seo',
+    }),
+    defineField({
+      name: 'seoImageUrl',
+      title: 'SEO Image URL',
+      type: 'url',
+      group: 'seo',
+      description: 'External fallback image URL used until seo.image has an uploaded Sanity image asset.',
+      validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
+    }),
+  ],
+  orderings: [
+    {
+      title: 'Sort Order',
+      name: 'sortOrderAsc',
+      by: [{field: 'sortOrder', direction: 'asc'}],
+    },
+    {
+      title: 'Title',
+      name: 'titleAsc',
+      by: [{field: 'title', direction: 'asc'}],
+    },
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'category',
+      media: 'cardImage.image',
+    },
+  },
+})

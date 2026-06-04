@@ -1,6 +1,37 @@
-import React from 'react';
+'use client';
+
+import React, {useEffect, useState} from 'react';
+import {
+  CONTACT_FOOTER_FALLBACK,
+  mapContactFooterData,
+  type ContactFooterData,
+  type SanityContactFooterDocument,
+} from '@/sanity/lib/contactFooterMapper';
+import {client} from '@/sanity/lib/client';
+import {contactFooterQuery} from '@/sanity/lib/queries';
 
 export default function ContactFooter() {
+  const [contactFooter, setContactFooter] = useState<ContactFooterData>(CONTACT_FOOTER_FALLBACK);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    client
+      .fetch<SanityContactFooterDocument | null>(contactFooterQuery)
+      .then((document) => {
+        if (isMounted) {
+          setContactFooter(mapContactFooterData(document));
+        }
+      })
+      .catch((error) => {
+        console.warn('Sanity contact/footer fetch failed. Using hardcoded fallback.', error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <>
       {/* =========================================
@@ -13,18 +44,25 @@ export default function ContactFooter() {
           {/* Left Side: Massive Typography & Info */}
           <div className="contact-info">
             <h2 className="contact-title">
-              <span className="obsidian-text">Let's build</span> <br/>
-              <span className="gold-text">together.</span>
+              <span className="obsidian-text">{contactFooter.headingLineOne}</span> <br/>
+              <span className="gold-text">{contactFooter.headingLineTwo}</span>
             </h2>
             
             <div className="contact-details">
               <div className="detail-block">
                 <span className="detail-label">Studio</span>
-                <p className="detail-text">Pune, Maharashtra<br/>India</p>
+                <p className="detail-text">
+                  {contactFooter.addressLines.map((line, index) => (
+                    <React.Fragment key={`${line}-${index}`}>
+                      {line}
+                      {index < contactFooter.addressLines.length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
+                </p>
               </div>
               <div className="detail-block">
                 <span className="detail-label">Inquiries</span>
-                <p className="detail-text">hello@architecture-studio.com<br/>+91 98765 43210</p>
+                <p className="detail-text">{contactFooter.email}<br/>{contactFooter.phone}</p>
               </div>
             </div>
           </div>
@@ -63,12 +101,12 @@ export default function ContactFooter() {
         <div className="footer-content">
           <div className="footer-logo">VAASTU.</div>
           <div className="footer-links">
-            <a href="#">Instagram</a>
-            <a href="#">LinkedIn</a>
-            <a href="#">ArchDaily</a>
+            {contactFooter.footerLinks.map((link) => (
+              <a key={`${link.label}-${link.url}`} href={link.url}>{link.label}</a>
+            ))}
           </div>
           <div className="footer-legal">
-            &copy; 2026 Vaastu Architecture. All Rights Reserved.
+            {contactFooter.copyrightText}
           </div>
         </div>
       </footer>

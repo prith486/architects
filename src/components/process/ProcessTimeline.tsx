@@ -1,10 +1,55 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  PROCESS_SECTION_FALLBACK,
+  mapProcessSectionData,
+  type ProcessSectionData,
+  type ProcessStepData,
+  type SanityProcessSectionDocument,
+} from '@/sanity/lib/processSectionMapper';
+import { client } from '@/sanity/lib/client';
+import { processSectionQuery } from '@/sanity/lib/queries';
+
+function TimelineStep({ step }: { step: ProcessStepData }) {
+  const content = (
+    <div className="timeline-content glass-panel-alt">
+      <span className="timeline-phase">{step.number}. {step.phaseLabel}</span>
+      <h3 className="timeline-title">{step.title}</h3>
+      <p className="timeline-body">
+        {step.description}
+      </p>
+    </div>
+  );
+
+  const image = (
+    <div className="timeline-image">
+      <img src={step.image} alt={step.alt} />
+    </div>
+  );
+
+  return (
+    <article className={`timeline-item ${step.side} timeline-has-image`}>
+      <div className="timeline-node"></div>
+      {step.side === 'left' ? (
+        <>
+          {content}
+          {image}
+        </>
+      ) : (
+        <>
+          {image}
+          {content}
+        </>
+      )}
+    </article>
+  );
+}
 
 export default function ProcessTimeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
+  const [processContent, setProcessContent] = useState<ProcessSectionData>(PROCESS_SECTION_FALLBACK);
 
   useEffect(() => {
     const processSection = sectionRef.current;
@@ -70,74 +115,41 @@ export default function ProcessTimeline() {
       window.removeEventListener('scroll', handleScroll);
       cardObserver.disconnect();
     };
+  }, [processContent.steps]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    client
+      .fetch<SanityProcessSectionDocument | null>(processSectionQuery)
+      .then((document) => {
+        if (isMounted) {
+          setProcessContent(mapProcessSectionData(document));
+        }
+      })
+      .catch((error) => {
+        console.warn('Sanity process section fetch failed. Using hardcoded fallback.', error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
     <section id="process" ref={sectionRef} className="process-section relative z-10 w-full">
       <div className="process-header-container">
-        <h2 className="process-main-title">The Blueprint.</h2>
-        <p className="process-subtitle">A rigorous approach from conceptual sketch to built reality.</p>
+        <h2 className="process-main-title">{processContent.sectionTitle}</h2>
+        <p className="process-subtitle">{processContent.sectionSubtitle}</p>
       </div>
 
       <div className="timeline-container">
         
         <div className="timeline-progress-line" ref={lineRef} id="timeline-line"></div>
 
-        <article className="timeline-item left timeline-has-image">
-          <div className="timeline-node"></div>
-          <div className="timeline-content glass-panel-alt">
-            <span className="timeline-phase">01. Discovery</span>
-            <h3 className="timeline-title">Site & Feasibility</h3>
-            <p className="timeline-body">
-              Before a single line is drawn, we analyze the topography, climate, and zoning. We listen to your vision to establish a robust architectural brief that harmonizes with the environment.
-            </p>
-          </div>
-          <div className="timeline-image">
-            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250744/1_uksekv.png" alt="Site & Feasibility Image" />
-          </div>
-        </article>
-
-        <article className="timeline-item right timeline-has-image">
-          <div className="timeline-node"></div>
-          <div className="timeline-image">
-            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250742/2_ad2lxb.png" alt="Architectural Drafting Image" />
-          </div>
-          <div className="timeline-content glass-panel-alt">
-            <span className="timeline-phase">02. Conception</span>
-            <h3 className="timeline-title">Architectural Drafting</h3>
-            <p className="timeline-body">
-              Translating vision into geometry. We develop initial sketches, massing studies, and spatial flows, ensuring every square meter is optimized for light, movement, and purpose.
-            </p>
-          </div>
-        </article>
-
-        <article className="timeline-item left timeline-has-image">
-          <div className="timeline-node"></div>
-          <div className="timeline-content glass-panel-alt">
-            <span className="timeline-phase">03. Engineering</span>
-            <h3 className="timeline-title">Precision Rendering</h3>
-            <p className="timeline-body">
-              The concept becomes tangible. Through hyper-realistic 3D rendering and rigorous structural engineering, we bridge the gap between imagination and physical reality.
-            </p>
-          </div>
-          <div className="timeline-image">
-            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250743/4_wejqgt.png" alt="Precision Rendering Image" />
-          </div>
-        </article>
-
-        <article className="timeline-item right timeline-has-image">
-          <div className="timeline-node"></div>
-          <div className="timeline-image">
-            <img src="https://res.cloudinary.com/dcryxjtb3/image/upload/q_auto/f_auto/v1780250743/3_c4nihg.png" alt="Construction & Handover Image" />
-          </div>
-          <div className="timeline-content glass-panel-alt">
-            <span className="timeline-phase">04. Execution</span>
-            <h3 className="timeline-title">Construction & Handover</h3>
-            <p className="timeline-body">
-              Absolute control over the build. We act as the guardian of the design during construction, ensuring the final structure is a flawless execution of the initial intent.
-            </p>
-          </div>
-        </article>
+        {processContent.steps.map((step) => (
+          <TimelineStep key={step.key} step={step} />
+        ))}
 
       </div>
     </section>

@@ -1,13 +1,32 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import HeroScroll from '@/components/canvas/HeroScroll';
 import AboutUs from '@/components/about/AboutUs';
 import PortfolioShowcase from '@/components/portfolio/PortfolioShowcase';
 import ProcessTimeline from '@/components/process/ProcessTimeline';
 import ContactFooter from '@/components/ui/ContactFooter';
+import {
+  HOMEPAGE_FALLBACK,
+  mapHomepageData,
+  type HomepageData,
+  type SanityHomepageDocument,
+} from '@/sanity/lib/homepageMapper';
+import {
+  PORTFOLIO_PROJECT_CARD_FALLBACK,
+  mapPortfolioShowcaseProjects,
+  type PortfolioProjectCardData,
+  type SanityPortfolioProjectDocument,
+} from '@/sanity/lib/portfolioShowcaseMapper';
+import { client } from '@/sanity/lib/client';
+import { homepageQuery, portfolioShowcaseProjectsQuery } from '@/sanity/lib/queries';
 
 export default function Home() {
+  const [homepageContent, setHomepageContent] = useState<HomepageData>(HOMEPAGE_FALLBACK);
+  const [portfolioProjects, setPortfolioProjects] = useState<PortfolioProjectCardData[]>(
+    PORTFOLIO_PROJECT_CARD_FALLBACK,
+  );
+
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -28,10 +47,48 @@ export default function Home() {
     return () => lenis.destroy();
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    client
+      .fetch<SanityHomepageDocument | null>(homepageQuery)
+      .then((document) => {
+        if (isMounted) {
+          setHomepageContent(mapHomepageData(document));
+        }
+      })
+      .catch((error) => {
+        console.warn('Sanity homepage fetch failed. Using hardcoded fallback.', error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    client
+      .fetch<SanityPortfolioProjectDocument[] | null>(portfolioShowcaseProjectsQuery)
+      .then((documents) => {
+        if (isMounted) {
+          setPortfolioProjects(mapPortfolioShowcaseProjects(documents));
+        }
+      })
+      .catch((error) => {
+        console.warn('Sanity portfolio projects fetch failed. Using hardcoded fallback.', error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <main className="min-h-screen">
       {/* Single seamless canvas experience for all frames */}
-      <HeroScroll />
+      <HeroScroll content={homepageContent} />
 
       {/* About Us / Philosophy Section (Sticky Scroll) */}
       <section id="philosophy" className="w-full relative z-10" style={{ background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)' }}>
@@ -51,7 +108,7 @@ export default function Home() {
       
       {/* Portfolio Showcase Section */}
       <section id="projects" className="relative z-10">
-        <PortfolioShowcase />
+        <PortfolioShowcase introContent={homepageContent} projects={portfolioProjects} />
       </section>
 
       {/* Process Timeline Section */}

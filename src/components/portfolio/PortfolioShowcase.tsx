@@ -5,14 +5,25 @@ import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { PROJECTS } from '@/data/projects';
-import type { Project } from '@/data/projects';
+import { HOMEPAGE_FALLBACK, type HomepageData } from '@/sanity/lib/homepageMapper';
+import {
+  PORTFOLIO_PROJECT_CARD_FALLBACK,
+  type PortfolioProjectCardData,
+} from '@/sanity/lib/portfolioShowcaseMapper';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-export default function PortfolioShowcase() {
+interface PortfolioShowcaseProps {
+  introContent?: Pick<HomepageData, 'portfolioIntroTitle' | 'portfolioHelperText'>
+  projects?: PortfolioProjectCardData[]
+}
+
+export default function PortfolioShowcase({
+  introContent = HOMEPAGE_FALLBACK,
+  projects = PORTFOLIO_PROJECT_CARD_FALLBACK,
+}: PortfolioShowcaseProps) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -23,15 +34,15 @@ export default function PortfolioShowcase() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Split projects into 3 columns for a true interlocking masonry layout
-  const col1 = PROJECTS.filter((_, i) => i % 3 === 0);
-  const col2 = PROJECTS.filter((_, i) => i % 3 === 1);
-  const col3 = PROJECTS.filter((_, i) => i % 3 === 2);
+  const col1 = projects.filter((_, i) => i % 3 === 0);
+  const col2 = projects.filter((_, i) => i % 3 === 1);
+  const col3 = projects.filter((_, i) => i % 3 === 2);
 
   const handleProjectClick = (slug: string) => {
     router.push(`/projects/${slug}`);
   };
 
-  const renderProjectCard = (project: Project, index: number) => {
+  const renderProjectCard = (project: PortfolioProjectCardData, index: number) => {
     return (
       <div 
         key={project.id}
@@ -156,7 +167,7 @@ export default function PortfolioShowcase() {
       const carouselCardH = isMobile ? 260 : 420;
       const gap = isMobile ? 12 : 24;
 
-      const totalCards = PROJECTS.length;
+      const totalCards = projects.length;
       const trackWidth = (totalCards * carouselCardW) + ((totalCards - 1) * gap);
       const trackStart = (viewportW / 2) - (trackWidth / 2);
       const trackY = (viewportH / 2) - (carouselCardH / 2);
@@ -180,7 +191,7 @@ export default function PortfolioShowcase() {
       );
 
       // Animate each card from the horizontal carousel row layout to the 3-column grid layout
-      PROJECTS.forEach((project, index) => {
+      projects.forEach((project, index) => {
         const placeholder = placeholderRefs.current[index];
         const card = cardRefs.current[index];
         if (!placeholder || !card) return;
@@ -304,7 +315,7 @@ export default function PortfolioShowcase() {
         }
       });
     };
-  }, { scope: containerRef });
+  }, { dependencies: [projects], scope: containerRef, revertOnUpdate: true });
 
   return (
     <div ref={triggerRef} className="relative w-full min-h-screen bg-[#111111] overflow-x-clip overflow-y-visible">
@@ -334,13 +345,13 @@ export default function PortfolioShowcase() {
                 Portfolio
               </h2>
               <h3 className="text-white text-4xl md:text-6xl font-playfair font-light tracking-wide leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
-                Curated Spaces
+                {introContent.portfolioIntroTitle}
               </h3>
               
               <div className="flex items-center gap-4 mt-6">
                 <div className="h-[1px] w-8 md:w-12 bg-gradient-to-r from-transparent to-[#C4A47C]/50"></div>
                 <p className="text-white/90 font-lato text-[9px] md:text-[11px] tracking-[0.3em] uppercase drop-shadow-md">
-                  Scroll to break alignment
+                  {introContent.portfolioHelperText}
                 </p>
                 <div className="h-[1px] w-8 md:w-12 bg-gradient-to-l from-transparent to-[#C4A47C]/50"></div>
               </div>
@@ -360,21 +371,21 @@ export default function PortfolioShowcase() {
             {/* Column 1 */}
             <div className="flex flex-col gap-6 md:gap-8">
               {col1.map((project) => {
-                const originalIndex = PROJECTS.findIndex(p => p.id === project.id);
+                const originalIndex = projects.findIndex(p => p.id === project.id);
                 return renderProjectCard(project, originalIndex);
               })}
             </div>
             {/* Column 2 */}
             <div className="flex flex-col gap-6 md:gap-8">
               {col2.map((project) => {
-                const originalIndex = PROJECTS.findIndex(p => p.id === project.id);
+                const originalIndex = projects.findIndex(p => p.id === project.id);
                 return renderProjectCard(project, originalIndex);
               })}
             </div>
             {/* Column 3 */}
             <div className="flex flex-col gap-6 md:gap-8">
               {col3.map((project) => {
-                const originalIndex = PROJECTS.findIndex(p => p.id === project.id);
+                const originalIndex = projects.findIndex(p => p.id === project.id);
                 return renderProjectCard(project, originalIndex);
               })}
             </div>

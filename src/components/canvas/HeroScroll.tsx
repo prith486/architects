@@ -5,13 +5,18 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { HOMEPAGE_FALLBACK, type HomepageData } from '@/sanity/lib/homepageMapper';
 
 // Register GSAP Plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
-export default function HeroScroll() {
+interface HeroScrollProps {
+  content?: HomepageData
+}
+
+export default function HeroScroll({ content = HOMEPAGE_FALLBACK }: HeroScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameObj = useRef({ index: 0 });
@@ -198,6 +203,14 @@ export default function HeroScroll() {
     fontSize: '1.125rem',
   };
 
+  const renderLines = (text: string) =>
+    text.split(/\r?\n/).map((line, index, lines) => (
+      <React.Fragment key={`${line}-${index}`}>
+        {line}
+        {index < lines.length - 1 && <br />}
+      </React.Fragment>
+    ));
+
   return (
     <div ref={containerRef} className="h-screen w-full relative bg-[#111] overflow-hidden">
       {/* Canvas Layer */}
@@ -238,12 +251,10 @@ export default function HeroScroll() {
 
       <div className="hero-main-content fade-layer pointer-events-none" data-speed="1">
         <h1 className="hero-title">
-          Spaces that elevate.<br />
-          Experiences that endure.
+          {renderLines(content.heroTitle)}
         </h1>
         <p className="hero-subtitle">
-          We design with intention, craft with precision<br />
-          and build places that inspire for generations.
+          {renderLines(content.heroSubtitle)}
         </p>
         <div className="hero-explore pointer-events-auto">
           <span className="explore-text">EXPLORE OUR PHILOSOPHY</span>
@@ -274,10 +285,10 @@ export default function HeroScroll() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0)_60%)] -z-10 scale-[1.5]" />
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl max-w-xl bg-gradient-to-r from-[#7D7F82] via-[#2A2826] to-[#050505] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(255,255,255,0.7)]" style={headingStyle}>
-          Absolute Precision.
+          {content.phaseSlides[0]?.title ?? HOMEPAGE_FALLBACK.phaseSlides[0].title}
         </h1>
         <p style={bodyStyle} className="max-w-md text-[#2A2826] drop-shadow-[0_2px_5px_rgba(255,255,255,0.9)] mt-2 font-medium">
-          Every millimeter calculated. Every angle deliberate.
+          {content.phaseSlides[0]?.description ?? HOMEPAGE_FALLBACK.phaseSlides[0].description}
         </p>
       </div>
 
@@ -290,10 +301,10 @@ export default function HeroScroll() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0)_60%)] -z-10 scale-[1.5]" />
         
         <h1 className="text-4xl md:text-5xl lg:text-6xl max-w-xl bg-gradient-to-r from-[#FDE8AE] via-[#C4A47C] to-[#8A6A40] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" style={headingStyle}>
-          Living Reality.
+          {content.phaseSlides[1]?.title ?? HOMEPAGE_FALLBACK.phaseSlides[1].title}
         </h1>
         <p style={bodyStyle} className="max-w-md text-[#E8D4B4] drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)] mt-2">
-          Bridging the gap between the drafted line and the built environment.
+          {content.phaseSlides[1]?.description ?? HOMEPAGE_FALLBACK.phaseSlides[1].description}
         </p>
       </div>
 
@@ -306,10 +317,10 @@ export default function HeroScroll() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0)_60%)] -z-10 scale-[1.5]" />
 
         <h1 className="text-5xl md:text-6xl lg:text-8xl w-max bg-gradient-to-r from-[#FDE8AE] via-[#C4A47C] to-[#8A6A40] text-transparent bg-clip-text drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" style={headingStyle}>
-          Curated Spaces.
+          {content.phaseSlides[2]?.title ?? HOMEPAGE_FALLBACK.phaseSlides[2].title}
         </h1>
         <p style={bodyStyle} className="max-w-xl text-lg md:text-xl text-[#E8D4B4] drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)] mt-2">
-          Interiors designed for the human experience.
+          {content.phaseSlides[2]?.description ?? HOMEPAGE_FALLBACK.phaseSlides[2].description}
         </p>
       </div>
 
@@ -441,7 +452,7 @@ export default function HeroScroll() {
               filter: 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.08))'
             }}
           >
-            Forging the intersection of raw materiality and natural harmony. We sculpt light, shadow, and geometry to create uncompromising architectural statements.
+            {renderLines(content.heroSupportingText)}
           </p>
         </div>
 
