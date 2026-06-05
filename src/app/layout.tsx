@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Great_Vibes, Lato, Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Inter, Playfair_Display, Great_Vibes, Lato, Cormorant_Garamond, DM_Sans, Pinyon_Script } from "next/font/google";
 import "./globals.css";
+import LeadMagnetWidget from "@/components/LeadMagnetWidget";
+import ExitIntentModal from "@/components/ExitIntentModal";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,6 +38,12 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
 });
 
+const pinyon = Pinyon_Script({
+  weight: "400",
+  variable: "--font-pinyon",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Defining Modern Elegance",
   description: "Spaces Crafted for Living. Where structural integrity meets curated warmth.",
@@ -49,13 +57,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${greatVibes.variable} ${lato.variable} ${cormorant.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} ${greatVibes.variable} ${lato.variable} ${cormorant.variable} ${dmSans.variable} ${pinyon.variable} h-full antialiased`}
     >
       <head>
         <link rel="preload" href="/assets/about-precision.webp" as="image" />
         <link rel="preload" href="/assets/about-reality.webp" as="image" />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <LeadMagnetWidget />
+        <ExitIntentModal />
+      </body>
     </html>
   );
 }

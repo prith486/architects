@@ -1,9 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroScroll from '@/components/canvas/HeroScroll';
+import PedigreeMarquee from '@/components/PedigreeMarquee';
 import AboutUs from '@/components/about/AboutUs';
 import PortfolioShowcase from '@/components/portfolio/PortfolioShowcase';
+import VisionBuilder from '@/components/VisionBuilder';
 import ProcessTimeline from '@/components/process/ProcessTimeline';
 import ContactFooter from '@/components/ui/ContactFooter';
 import {
@@ -28,6 +32,10 @@ export default function Home() {
   );
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
@@ -38,13 +46,21 @@ export default function Home() {
       touchMultiplier: 2,
     });
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    // Synchronize Lenis scrolling with GSAP ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
 
-    return () => lenis.destroy();
+    const updateLenis = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+    };
   }, []);
 
   useEffect(() => {
@@ -90,6 +106,9 @@ export default function Home() {
       {/* Single seamless canvas experience for all frames */}
       <HeroScroll content={homepageContent} />
 
+      {/* Social Proof Marquee */}
+      <PedigreeMarquee content={homepageContent.pedigreeMarquee} />
+
       {/* About Us / Philosophy Section (Sticky Scroll) */}
       <section id="philosophy" className="w-full relative z-10" style={{ background: 'radial-gradient(circle at center, #FCFAF7 0%, #F1EBE0 100%)' }}>
         {/* Paper Emboss Grain Layer - High Intensity */}
@@ -107,12 +126,17 @@ export default function Home() {
       </section>
       
       {/* Portfolio Showcase Section */}
-      <section id="projects" className="relative z-10">
+      <section id="projects" className="relative z-10 mb-20">
         <PortfolioShowcase introContent={homepageContent} projects={portfolioProjects} />
       </section>
 
+      {/* Gamified Vision Builder Section - Added massive spacing to ensure no merging */}
+      <VisionBuilder content={homepageContent.visionBuilder} />
+
       {/* Process Timeline Section */}
-      <ProcessTimeline />
+      <div id="process" className="mt-20">
+        <ProcessTimeline />
+      </div>
 
       {/* Contact & Footer Section */}
       <ContactFooter />

@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useRef, useState } from 'react';
+import CinematicShowreel from '@/components/CinematicShowreel';
 import {
   ABOUT_PHILOSOPHY_FALLBACK,
   mapAboutPhilosophyData,
@@ -89,9 +90,10 @@ export default function AboutUs() {
             </Fragment>
           ))}
         </h2>
-        <p className="about-subtitle text-center max-w-[800px] mt-2 mb-16 text-[16px] md:text-[20px] leading-[1.8] text-[#5c5c5c] font-light font-lato">
+        <p className="about-subtitle text-center max-w-[800px] mt-2 mb-8 text-[16px] md:text-[20px] leading-[1.8] text-[#5c5c5c] font-light font-lato">
           {aboutContent.subtitle}
         </p>
+        <CinematicShowreel content={aboutContent.showreel} />
       </div>
 
       <div className="about-grid-container">

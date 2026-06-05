@@ -8,13 +8,14 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { Project } from '@/data/projects';
 import { PROJECTS } from '@/data/projects';
+import type { MappedProject } from '@/sanity/lib/projectMapper';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 interface ProjectDetailClientProps {
-  project: Project;
+  project: MappedProject;
 }
 
 interface GalleryImage {
@@ -38,6 +39,53 @@ function SectionMarker({ number, label, dark = false }: { number: string; label:
         {label}
       </div>
     </div>
+  );
+}
+
+function portableTextToParagraphs(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((block) => {
+      if (!block || typeof block !== 'object') return '';
+      const children = 'children' in block ? block.children : undefined;
+      if (!Array.isArray(children)) return '';
+
+      return children
+        .map((child) => {
+          if (!child || typeof child !== 'object' || !('text' in child)) return '';
+          return typeof child.text === 'string' ? child.text : '';
+        })
+        .join('');
+    })
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+function splitFinalWord(text: string) {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= 1) {
+    return { prefix: '', accent: text };
+  }
+
+  return {
+    prefix: words.slice(0, -1).join(' '),
+    accent: words[words.length - 1],
+  };
+}
+
+function renderQuoteText(text: string) {
+  const cleaned = text.trim().replace(/^["“”]+|["“”]+$/g, '');
+  const words = cleaned.split(/\s+/);
+  const firstWord = words[0] ?? '';
+  const rest = words.slice(1).join(' ');
+
+  return (
+    <>
+      <span className="text-gold-muted">&ldquo;{firstWord}</span>
+      {rest ? ` ${rest}` : ''}
+      &rdquo;
+    </>
   );
 }
 
@@ -127,44 +175,69 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const captionRef = useRef<HTMLDivElement>(null);
   const titleWords = project.title.split(' ');
+  const fallbackNarrativeParagraphs = [
+    project.description,
+    'The architectural narrative unfolds through deliberate spatial sequencing, where each volume responds to both context and function. Materials were chosen not for novelty but for their inherent qualities-texture, weight, and the way light transforms their surfaces throughout the day.',
+    'This project embodies a philosophy of measured intervention, where design serves as a framework for living rather than an imposition upon it. The result is a space that feels both timeless and entirely of its moment.',
+  ];
+  const narrativeHeading = project.sanity?.narrativeHeading ?? 'Where restraint meets resolution.';
+  const narrativeHeadingParts = splitFinalWord(narrativeHeading);
+  const narrativeParagraphs =
+    project.sanity?.narrativeParagraphs && project.sanity.narrativeParagraphs.length > 0
+      ? project.sanity.narrativeParagraphs
+      : fallbackNarrativeParagraphs;
+  const designIntentHeading = project.sanity?.designIntentHeading ?? 'A study in spatial restraint';
+  const designIntentHeadingParts = splitFinalWord(designIntentHeading);
+  const designIntentParagraphs = portableTextToParagraphs(project.sanity?.designIntentBody);
+  const materialityParagraphs = portableTextToParagraphs(project.sanity?.materialityBody);
+  const cinematicQuote = project.sanity?.cinematicQuote ?? 'Architecture is the thoughtful making of space.';
+  const cinematicQuoteAttribution = project.sanity?.cinematicQuoteAttribution ?? 'Vaastu Architecture';
+  const cinematicQuoteBackgroundImage = project.sanity?.cinematicQuoteBackgroundImage ?? project.image;
+  const materialityImage = project.sanity?.materialityImage ?? project.image;
   const statItems = [
     { label: 'Total Area', value: project.details.area },
     { label: 'Typology', value: project.category },
     { label: 'Client', value: project.details.client },
     { label: 'Year', value: project.details.year },
   ];
-  const galleryImages: GalleryImage[] = [
-    {
-      src: project.image,
-      alt: `${project.title} featured view`,
-      label: 'Featured View',
-      index: '01',
-    },
-    {
-      src: project.image,
-      alt: `${project.title} detail 1`,
-      label: 'Detail Study',
-      index: '02',
-    },
-    {
-      src: project.image,
-      alt: `${project.title} detail 2`,
-      label: 'Material Detail',
-      index: '03',
-    },
-    {
-      src: project.image,
-      alt: `${project.title} context`,
-      label: 'Architectural Context',
-      index: '04',
-    },
-    {
-      src: project.image,
-      alt: `${project.title} interior`,
-      label: 'Interior Sequence',
-      index: '05',
-    },
-  ];
+  const galleryImages: GalleryImage[] =
+    project.sanity?.gallery && project.sanity.gallery.length > 0
+      ? project.sanity.gallery.map((image, index) => ({
+          ...image,
+          index: String(index + 1).padStart(2, '0'),
+        }))
+      : [
+          {
+            src: project.image,
+            alt: `${project.title} featured view`,
+            label: 'Featured View',
+            index: '01',
+          },
+          {
+            src: project.image,
+            alt: `${project.title} detail 1`,
+            label: 'Detail Study',
+            index: '02',
+          },
+          {
+            src: project.image,
+            alt: `${project.title} detail 2`,
+            label: 'Material Detail',
+            index: '03',
+          },
+          {
+            src: project.image,
+            alt: `${project.title} context`,
+            label: 'Architectural Context',
+            index: '04',
+          },
+          {
+            src: project.image,
+            alt: `${project.title} interior`,
+            label: 'Interior Sequence',
+            index: '05',
+          },
+        ];
 
   const paperBackground = {
     backgroundColor: '#FAF9F7',
@@ -396,23 +469,27 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
             >
               <span className="inline-block h-12 w-[2px] shrink-0 bg-[#E5E3DF]" />
               <h2 className="font-cormorant font-light italic leading-[1.08] tracking-[-0.01em] text-[#1e1c18]" style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)' }}>
-                Where restraint meets{' '}
+                {narrativeHeadingParts.prefix}
+                {narrativeHeadingParts.prefix ? ' ' : ''}
                 <span className="text-gold-primary italic [text-shadow:0_0_30px_rgba(201,169,110,0.2)]">
-                  resolution.
+                  {narrativeHeadingParts.accent}
                 </span>
               </h2>
             </motion.div>
             
             <div className="space-y-7 font-[var(--font-dm-sans)] text-[15px] font-light leading-[1.75] text-[#3D3D3A] md:text-[16px]" style={{ maxWidth: '65ch' }}>
-              <p className="first-letter:text-6xl first-letter:font-cormorant first-letter:font-light first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:text-[#1e1c18]">
-                {project.description}
-              </p>
-              <p>
-                The architectural narrative unfolds through deliberate spatial sequencing, where each volume responds to both context and function. Materials were chosen not for novelty but for their inherent qualities-texture, weight, and the way light transforms their surfaces throughout the day.
-              </p>
-              <p>
-                This project embodies a philosophy of measured intervention, where design serves as a framework for living rather than an imposition upon it. The result is a space that feels both timeless and entirely of its moment.
-              </p>
+              {narrativeParagraphs.map((paragraph, index) => (
+                <p
+                  key={`${paragraph}-${index}`}
+                  className={
+                    index === 0
+                      ? 'first-letter:text-6xl first-letter:font-cormorant first-letter:font-light first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:text-[#1e1c18]'
+                      : undefined
+                  }
+                >
+                  {paragraph}
+                </p>
+              ))}
             </div>
           </div>
         </div>
@@ -434,16 +511,20 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
                   <span>Design Intent</span>
                 </div>
                 <h3 className="text-3xl md:text-[2.65rem] font-cormorant font-semibold text-[#1e1c18] leading-[1.15] mb-7 tracking-[-0.005em]" style={{ maxWidth: '20ch' }}>
-                  A study in spatial{' '}
-                  <span className="text-gold-primary">restraint</span>
+                  {designIntentHeadingParts.prefix}
+                  {designIntentHeadingParts.prefix ? ' ' : ''}
+                  <span className="text-gold-primary">{designIntentHeadingParts.accent}</span>
                 </h3>
                 <div className="space-y-5 font-[var(--font-dm-sans)] text-[15px] font-light text-[#3D3D3A] leading-[1.75]" style={{ maxWidth: '58ch' }}>
-                  <p>
-                    The design strategy centered on establishing clear sightlines and volumetric hierarchy. By compressing certain passages and expanding others, we crafted a choreography of movement that reveals the project gradually rather than all at once.
-                  </p>
-                  <p>
-                    Natural light became a primary material, shaped and directed through carefully positioned apertures. Each opening serves a specific purpose-framing views, marking time, or simply animating a wall surface.
-                  </p>
+                  {(designIntentParagraphs.length > 0
+                    ? designIntentParagraphs
+                    : [
+                        'The design strategy centered on establishing clear sightlines and volumetric hierarchy. By compressing certain passages and expanding others, we crafted a choreography of movement that reveals the project gradually rather than all at once.',
+                        'Natural light became a primary material, shaped and directed through carefully positioned apertures. Each opening serves a specific purpose-framing views, marking time, or simply animating a wall surface.',
+                      ]
+                  ).map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
 
@@ -453,9 +534,14 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
                   <span>Materiality</span>
                 </div>
                 <div className="space-y-5 font-[var(--font-dm-sans)] text-[15px] font-light text-[#3D3D3A] leading-[1.75]" style={{ maxWidth: '58ch' }}>
-                  <p>
-                    The material palette privileges tactility over spectacle. Raw concrete, honed limestone, and oiled oak establish a baseline of authenticity, while bronze detailing provides moments of warmth and refinement. These choices reflect an architecture of substance rather than surface.
-                  </p>
+                  {(materialityParagraphs.length > 0
+                    ? materialityParagraphs
+                    : [
+                        'The material palette privileges tactility over spectacle. Raw concrete, honed limestone, and oiled oak establish a baseline of authenticity, while bronze detailing provides moments of warmth and refinement. These choices reflect an architecture of substance rather than surface.',
+                      ]
+                  ).map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
             </div>
@@ -464,7 +550,7 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
             <div className="lg:col-span-6">
               <div className="relative w-full aspect-[3/4] lg:aspect-[4/5] lg:sticky lg:top-24">
                 <img
-                  src={project.image}
+                  src={materialityImage}
                   alt={`${project.title} material detail`}
                   className="w-full h-full object-cover shadow-[0_18px_60px_rgba(30,28,24,0.12)]"
                   style={{ 
@@ -483,7 +569,7 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
       <section className="relative w-full h-[450px] md:h-[650px] overflow-hidden bg-[#111110]">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${project.image})`, backgroundAttachment: 'fixed' }}
+          style={{ backgroundImage: `url(${cinematicQuoteBackgroundImage})`, backgroundAttachment: 'fixed' }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/55"></div>
         </div>
@@ -502,10 +588,10 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
             viewport={{ once: true, amount: 0.45 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-gold-muted">&ldquo;Architecture</span> is the thoughtful making of space.&rdquo;
+            {renderQuoteText(cinematicQuote)}
           </motion.blockquote>
           <div className="mt-8 font-[var(--font-dm-sans)] text-[11px] font-medium uppercase tracking-[0.2em] text-white/40">
-            Vaastu Architecture
+            {cinematicQuoteAttribution}
           </div>
         </div>
       </section>

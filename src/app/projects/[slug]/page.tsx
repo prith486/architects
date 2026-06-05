@@ -14,6 +14,8 @@ type ProjectPageParams = {
   params: Promise<{ slug: string }>;
 };
 
+export const dynamic = 'force-dynamic';
+
 async function fetchSanityProject(slug: string) {
   try {
     return await client.fetch<SanityProjectDocument | null>(projectBySlugQuery, { slug });

@@ -14,6 +14,11 @@ export interface SanityAboutPhilosophyDocument {
   mainHeading?: string | null
   subtitle?: string | null
   panels?: SanityAboutPanel[] | null
+  showreelEyebrow?: string | null
+  showreelTitle?: string | null
+  showreelVideoUrl?: string | null
+  showreelCaptionEyebrow?: string | null
+  showreelCaptionTitle?: string | null
 }
 
 export interface AboutPanelData {
@@ -32,6 +37,13 @@ export interface AboutPhilosophyData {
   }>
   subtitle: string
   panels: AboutPanelData[]
+  showreel: {
+    eyebrow: string
+    title: string
+    videoUrl: string
+    captionEyebrow: string
+    captionTitle: string
+  }
 }
 
 export const ABOUT_PHILOSOPHY_FALLBACK: AboutPhilosophyData = {
@@ -70,6 +82,13 @@ export const ABOUT_PHILOSOPHY_FALLBACK: AboutPhilosophyData = {
       alt: 'Modern Living Space Harmony',
     },
   ],
+  showreel: {
+    eyebrow: 'Immersion',
+    title: 'Watch the Showreel',
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    captionEyebrow: 'Featured Project',
+    captionTitle: 'The Khandala Retreat',
+  },
 }
 
 function cleanString(value: string | null | undefined) {
@@ -125,5 +144,18 @@ export function mapAboutPhilosophyData(
     headingLines: normalizeHeading(document?.mainHeading),
     subtitle: cleanString(document?.subtitle) ?? ABOUT_PHILOSOPHY_FALLBACK.subtitle,
     panels,
+    showreel: {
+      eyebrow:
+        cleanString(document?.showreelEyebrow) ?? ABOUT_PHILOSOPHY_FALLBACK.showreel.eyebrow,
+      title: cleanString(document?.showreelTitle) ?? ABOUT_PHILOSOPHY_FALLBACK.showreel.title,
+      videoUrl:
+        cleanString(document?.showreelVideoUrl) ?? ABOUT_PHILOSOPHY_FALLBACK.showreel.videoUrl,
+      captionEyebrow:
+        cleanString(document?.showreelCaptionEyebrow) ??
+        ABOUT_PHILOSOPHY_FALLBACK.showreel.captionEyebrow,
+      captionTitle:
+        cleanString(document?.showreelCaptionTitle) ??
+        ABOUT_PHILOSOPHY_FALLBACK.showreel.captionTitle,
+    },
   }
 }

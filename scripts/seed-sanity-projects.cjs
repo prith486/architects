@@ -57,7 +57,7 @@ function projectToSanityDocument(project, index) {
   }
 
   return {
-    _id: `project.${project.slug}`,
+    _id: `project-${project.slug}`,
     _type: 'project',
     title: project.title,
     slug: {
